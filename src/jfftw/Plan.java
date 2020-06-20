@@ -43,12 +43,8 @@ public class Plan {
     private static native long jfftw_plan_dft_r2c_2d(int n0, int n1, Real in, Complex out, int flags);
     private static native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, Real in, Complex out, int flags);
 
-    public void fprint(File f) {
-        jfftw_fprint_plan(this, f);
-    }
-    public void print() {
-        jfftw_print_plan(this);
-    }
+    public void fprint(File f) { jfftw_fprint_plan(this, f); }
+    public void print() { jfftw_print_plan(this); }
     public double cost() { return Interface.cost(this); }
     public void destroy() { Interface.destroyPlan(this); }
     public double estimateCost() { return Interface.estimateCost(this); }
@@ -58,9 +54,7 @@ public class Plan {
     public void executeDftRealToComplex(Real in, Complex out) { Execution.executeDftRealToComplex(this, in, out); }
     public void executeRealToReal(Real in, Real out) { Execution.executeRealToReal(this, in, out); }
     public void finalize() { destroy(); }
-    public String toString() {
-        return jfftw_sprint_plan(this);
-    }
+    public String toString() { return jfftw_sprint_plan(this); }
 
     private Type determineType() {
         if (in instanceof Complex)
