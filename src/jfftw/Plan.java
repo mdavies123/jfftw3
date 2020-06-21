@@ -122,7 +122,7 @@ public class Plan {
                     case 3:
                         return jfftw_plan_dft_c2r_3d(size[0], size[1], size[2], (Complex) in, (Real) out, flags);
                     default:
-                        return jfftw_plan_dft_c2r(size.length, size, (ComplexArray) in, (Real) out, flags);
+                        return jfftw_plan_dft_c2r(size.length, size, (Complex) in, (Real) out, flags);
                 }
             case REAL_TO_COMPLEX:
                 switch (size.length) {
