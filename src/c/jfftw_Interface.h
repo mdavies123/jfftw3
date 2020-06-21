@@ -7,13 +7,37 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct {
+    jdoubleArray j;
+    double* c;
+} array_pair_s;
+
+typedef array_pair_s* array_pair;
+
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_alignment_of
- * Signature: ([D)I
+ * Signature: (Ljfftw/Value;)I
  */
 JNIEXPORT jint JNICALL Java_jfftw_Interface_jfftw_1alignment_1of
-  (JNIEnv *, jclass, jdoubleArray);
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_allocate_complex_buffer
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1allocate_1complex_1buffer
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_allocate_real_buffer
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1allocate_1real_1buffer
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     jfftw_Interface
@@ -57,11 +81,123 @@ JNIEXPORT jdouble JNICALL Java_jfftw_Interface_jfftw_1estimate_1cost
 
 /*
  * Class:     jfftw_Interface
+ * Method:    jfftw_execute
+ * Signature: (Ljfftw/Plan;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_execute_dft
+ * Signature: (Ljfftw/Plan;Ljfftw/Complex;Ljfftw/Complex;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft
+  (JNIEnv *, jclass, jobject, jobject, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_execute_dft_c2r
+ * Signature: (Ljfftw/Plan;Ljfftw/Complex;Ljfftw/Real;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1c2r
+  (JNIEnv *, jclass, jobject, jobject, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_execute_dft_r2c
+ * Signature: (Ljfftw/Plan;Ljfftw/Real;Ljfftw/Complex;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1r2c
+  (JNIEnv *, jclass, jobject, jobject, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_execute_r2r
+ * Signature: (Ljfftw/Plan;Ljfftw/Real;Ljfftw/Real;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1r2r
+  (JNIEnv *, jclass, jobject, jobject, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_export_wisdom_to_file
+ * Signature: (Ljava/io/File;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1file
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_export_wisdom_to_filename
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1filename
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_export_wisdom_to_string
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1string
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     jfftw_Interface
  * Method:    jfftw_flops
  * Signature: (Ljfftw/Plan;[D[D[D)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1flops
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_forget_wisdom
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1forget_1wisdom
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_fprint_plan
+ * Signature: (Ljfftw/Plan;Ljava/io/File;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1fprint_1plan
+  (JNIEnv *, jclass, jobject, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_import_system_wisdom
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_import_wisdom_from_file
+ * Signature: (Ljava/io/File;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_import_wisdom_from_filename
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1filename
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_import_wisdom_from_string
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1string
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     jfftw_Interface
@@ -94,6 +230,118 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1plan_1with_1nthreads
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1set_1timelimit
   (JNIEnv *, jclass, jdouble);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_print_plan
+ * Signature: (Ljfftw/Plan;)V
+ */
+JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1print_1plan
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_sprint_plan
+ * Signature: (Ljfftw/Plan;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1sprint_1plan
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft
+ * Signature: (I[ILjfftw/Complex;Ljfftw/Complex;II)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft
+  (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_1d
+ * Signature: (ILjfftw/Complex;Ljfftw/Complex;II)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_11d
+  (JNIEnv *, jclass, jint, jobject, jobject, jint, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_2d
+ * Signature: (IILjfftw/Complex;Ljfftw/Complex;II)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_12d
+  (JNIEnv *, jclass, jint, jint, jobject, jobject, jint, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_3d
+ * Signature: (IIILjfftw/Complex;Ljfftw/Complex;II)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_13d
+  (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_c2r
+ * Signature: (I[ILjfftw/Complex;Ljfftw/Real;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
+  (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_c2r_1d
+ * Signature: (ILjfftw/Complex;Ljfftw/Real;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_11d
+  (JNIEnv *, jclass, jint, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_c2r_2d
+ * Signature: (IILjfftw/Complex;Ljfftw/Real;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_12d
+  (JNIEnv *, jclass, jint, jint, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_c2r_3d
+ * Signature: (IIILjfftw/Complex;Ljfftw/Real;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_13d
+  (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_r2c
+ * Signature: (I[ILjfftw/Real;Ljfftw/Complex;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
+  (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_r2c_1d
+ * Signature: (ILjfftw/Real;Ljfftw/Complex;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_11d
+  (JNIEnv *, jclass, jint, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_r2c_2d
+ * Signature: (IILjfftw/Real;Ljfftw/Complex;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_12d
+  (JNIEnv *, jclass, jint, jint, jobject, jobject, jint);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_plan_dft_r2c_3d
+ * Signature: (IIILjfftw/Real;Ljfftw/Complex;I)J
+ */
+JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_13d
+  (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint);
 
 #ifdef __cplusplus
 }

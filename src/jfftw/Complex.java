@@ -1,14 +1,9 @@
 package jfftw;
 
-public class Complex extends Value {
+abstract class Complex extends Value {
 
-    public Complex() { }
-    public Complex (int n) { arr = new double[n * 2]; }
+    public abstract void set(double[] dbl);
 
-    public static Complex wrap(double[] d) {
-        Complex c = new Complex();
-        c.setArray(d);
-        return c;
-    }
+    public abstract int size();
 
 }

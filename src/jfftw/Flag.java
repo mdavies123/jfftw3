@@ -4,7 +4,7 @@ public enum Flag {
 
     NO_TIMELIMIT(-1),
     MEASURE(0),
-    DESTROY_INPUT(1 << 0),
+    DESTROY_INPUT(1),
     UNALIGNED(1 << 1),
     CONSERVE_MEMORY(1 << 2),
     EXHAUSTIVE(1 << 3),

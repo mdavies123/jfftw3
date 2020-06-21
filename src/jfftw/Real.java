@@ -1,14 +1,8 @@
 package jfftw;
 
-public class Real extends Value {
+abstract class Real extends Value {
 
-    public Real() { }
-    public Real(int n) { arr = new double[n]; }
+    public abstract void set(double[] dbl);
 
-    public static Real wrap(double[] d) {
-        Real r = new Real();
-        r.setArray(d);
-        return r;
-    }
-
+    public abstract int size();
 }
