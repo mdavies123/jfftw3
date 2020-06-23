@@ -121,14 +121,6 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1r2r
 
 /*
  * Class:     jfftw_Interface
- * Method:    jfftw_export_wisdom_to_file
- * Signature: (Ljava/io/File;)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1file
-  (JNIEnv *, jclass, jobject);
-
-/*
- * Class:     jfftw_Interface
  * Method:    jfftw_export_wisdom_to_filename
  * Signature: (Ljava/lang/String;)V
  */
@@ -162,7 +154,7 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1forget_1wisdom
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_fprint_plan
- * Signature: (Ljfftw/Plan;Ljava/io/File;)V
+ * Signature: (Ljfftw/Plan;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1fprint_1plan
   (JNIEnv *, jclass, jobject, jobject);

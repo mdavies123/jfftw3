@@ -1,9 +1,17 @@
 package jfftw;
 
-abstract class Complex extends Value {
+import java.nio.ByteOrder;
 
-    public abstract void set(double[] dbl);
+public class Complex extends Value {
 
-    public abstract int size();
+    public Complex(int n) {
+        size = n;
+        buff = Interface.jfftw_allocate_complex_buffer(n).order(ByteOrder.nativeOrder()).asDoubleBuffer();
+    }
+
+    public Complex(double[] in) {
+        this(in.length / 2);
+        buff.put(in);
+    }
 
 }

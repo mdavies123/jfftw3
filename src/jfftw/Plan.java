@@ -8,33 +8,31 @@ import static jfftw.Interface.*;
 
 public class Plan {
 
-    public final Sign sign;
-    public final Type type;
+    protected final Sign sign;
+    protected final Type type;
     protected final Value in;
     protected final Value out;
-    protected final long planPointer;
-    private final int[] size;
-    private final int flags;
-
-    public Plan(Value i, Value o, Sign s, Flag[] f, int... n) {
-        this(i, o, s, Flag.combine(f), n);
-    }
+    protected final long address;
+    protected final int rank;
+    protected final int[] size;
+    protected final int flags;
 
     public Plan(Value i, Value o, Sign s, int f, int... n) {
-        in = i;
-        out = o;
-        sign = s;
-        flags = f;
-        size = Arrays.copyOf(n, n.length);
-        type = determineType();
+        this.in = i;
+        this.out = o;
+        this.sign = s;
+        this.type = determineType();
+        this.rank = n.length;
+        this.size = Arrays.copyOf(n, rank);
+        this.flags = f;
         if (validateSize())
-            planPointer = create();
+            this.address = create();
         else
-            throw new UnsupportedOperationException("mismatched input sizes");
+            throw new IllegalArgumentException("invalid plan configuration");
     }
 
     public void fprint(File f) {
-        jfftw_fprint_plan(this, f);
+        jfftw_fprint_plan(this, f.getAbsolutePath());
     }
 
     public void print() {
@@ -58,23 +56,23 @@ public class Plan {
     }
 
     public void execute(Complex in, Complex out) {
+        validateType(Type.COMPLEX_TO_COMPLEX);
         jfftw_execute_dft(this, in, out);
     }
 
     public void execute(Complex in, Real out) {
+        validateType(Type.COMPLEX_TO_REAL);
         jfftw_execute_dft_c2r(this, in, out);
     }
 
     public void execute(Real in, Complex out) {
+        validateType(Type.REAL_TO_COMPLEX);
         jfftw_execute_dft_r2c(this, in, out);
     }
 
     public void execute(Real in, Real out) {
+        validateType(Type.REAL_TO_REAL);
         jfftw_execute_r2r(this, in, out);
-    }
-
-    public void finalize() {
-        destroy();
     }
 
     public String toString() {
@@ -93,11 +91,16 @@ public class Plan {
             return Type.REAL_TO_REAL;
     }
 
+    private void validateType(Type t) {
+        if (type != t)
+            throw new IllegalArgumentException("requested " + t + " transform for " + type + " plan");
+    }
+
     private boolean validateSize() {
         int N = 1;
         for (int i : size)
             N *= i;
-        return in.size() == N && out.size() == N;
+        return in.size() == N && out.size() == N && N > 0;
     }
 
     private long create() {
@@ -135,8 +138,10 @@ public class Plan {
                     default:
                         return jfftw_plan_dft_r2c(size.length, size, (Real) in, (Complex) out, flags);
                 }
-            default:
+            case REAL_TO_REAL:
                 throw new UnsupportedOperationException("real to real transforms not supported");
+            default:
+                throw new UnsupportedOperationException("unknown transform type");
         }
     }
 
@@ -147,11 +152,12 @@ public class Plan {
         return flags == plan.flags &&
                 sign == plan.sign &&
                 type == plan.type &&
+                address == plan.address &&
                 Arrays.equals(size, plan.size);
     }
 
     public int hashCode() {
-        int result = Objects.hash(sign, type, flags);
+        int result = Objects.hash(sign, type, flags, address);
         result = 31 * result + Arrays.hashCode(size);
         return result;
     }
@@ -168,7 +174,7 @@ public class Plan {
         }
     }
 
-    private enum Type {
+    protected enum Type {
         COMPLEX_TO_COMPLEX,
         COMPLEX_TO_REAL,
         REAL_TO_COMPLEX,

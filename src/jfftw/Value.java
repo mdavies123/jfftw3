@@ -1,12 +1,19 @@
 package jfftw;
 
+import java.nio.DoubleBuffer;
+
 abstract class Value {
 
-    protected abstract boolean isBuffer();
+    protected DoubleBuffer buff;
+    protected int size;
 
-    public abstract int size();
+    public int size() {
+        return size;
+    }
 
-    public abstract void set(double[] d);
+    public DoubleBuffer get() {
+        return buff;
+    }
 
     public int alignment() {
         return Interface.jfftw_alignment_of(this);

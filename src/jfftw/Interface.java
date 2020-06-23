@@ -46,7 +46,7 @@ public class Interface {
 
     protected static synchronized native void jfftw_forget_wisdom();
 
-    protected static synchronized native void jfftw_fprint_plan(Plan p, File output_file);
+    protected static synchronized native void jfftw_fprint_plan(Plan p, String s);
 
     protected static synchronized native void jfftw_import_system_wisdom();
 
@@ -104,7 +104,8 @@ public class Interface {
         jfftw_flops(p, add, mul, fmas);
     }
 
-    public static void initThreads() {
+    public static void initThreads(String lib) {
+        System.loadLibrary(lib);
         jfftw_init_threads();
     }
 

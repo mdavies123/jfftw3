@@ -10,8 +10,8 @@ public class Wisdom {
         jfftw_forget_wisdom();
     }
 
-    public static void exportToFile(File f) {
-        jfftw_export_wisdom_to_file(f);
+    public static void export(File f) {
+        jfftw_export_wisdom_to_filename(f.getAbsolutePath());
     }
 
     public static void exportToFilename(String s) {

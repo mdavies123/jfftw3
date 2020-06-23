@@ -1,37 +1,37 @@
 package jfftw.examples;
 
-import jfftw.ComplexBuffer;
+import jfftw.Complex;
 import jfftw.Flag;
 import jfftw.Plan;
 
-public class ParallelExecution implements Runnable {
+class ParallelExecution implements Runnable {
 
     protected static Plan plan;
     protected static int N;
 
-    protected int t;
+    protected long start;
 
     public static void main(String[] args) {
         N = 8192;
-        int nThreads = 8;
-        ComplexBuffer in = new ComplexBuffer(N);
-        ComplexBuffer out = new ComplexBuffer(N);
+        int nThreads = 1;
+        Complex in = new Complex(N);
+        Complex out = new Complex(N);
         plan = new Plan(in, out, Plan.Sign.POSITIVE, Flag.combine(Flag.MEASURE), N);
+        long start = System.nanoTime();
         for (int i = 0; i < nThreads; i++)
-            new Thread(new ParallelExecution(i)).start();
+            new Thread(new ParallelExecution(start)).start();
     }
 
-    public ParallelExecution(int t) {
-        this.t = t;
+    public ParallelExecution(long start) {
+        this.start = start;
     }
 
     public void run() {
-        long startThread = System.nanoTime();
-        ComplexBuffer newInput = new ComplexBuffer(N);
-        ComplexBuffer newOutput = new ComplexBuffer(N);
+        Complex newInput = new Complex(N);
+        Complex newOutput = new Complex(N);
         plan.execute(newInput, newOutput);
-        double execMs = (double) (System.nanoTime() - startThread) / 1e6;
-        System.out.println("Thread " + t + " completed in " + execMs + " ms.");
+        double time = (double) (System.nanoTime() - start) / 1e6;
+        System.out.println(Thread.currentThread().getName() + " completed in " + time + " ms.");
     }
 
 }

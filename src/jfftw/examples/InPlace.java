@@ -1,18 +1,18 @@
 package jfftw.examples;
 
-import jfftw.ComplexArray;
-import jfftw.ComplexBuffer;
+import jfftw.Complex;
 import jfftw.Plan;
 
-public class InPlace {
+import java.io.File;
+
+class InPlace {
 
     public static void main(String[] args) {
         int N = 8192;
-        ComplexBuffer cplx = new ComplexBuffer(N);
+        Complex cplx = new Complex(N);
         Plan p = new Plan(cplx, cplx, Plan.Sign.POSITIVE, 0, N);
         p.execute();
-        ComplexArray cplxArray = new ComplexArray(N);
-        p.execute(cplxArray, cplxArray);
+        p.fprint(new File("plan.txt"));
     }
 
 }
