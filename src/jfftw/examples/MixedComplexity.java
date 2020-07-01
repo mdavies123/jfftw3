@@ -5,6 +5,9 @@ import jfftw.*;
 class MixedComplexity {
 
     public static void main(String[] args) {
+    	
+    	Interface.loadLibraries("fftw3", "jfftw");
+    	
         int N = 1024;
 
         Real ri = new Real(N);

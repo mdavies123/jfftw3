@@ -2,6 +2,7 @@ package jfftw.examples;
 
 import jfftw.Complex;
 import jfftw.Flag;
+import jfftw.Interface;
 import jfftw.Plan;
 
 class ParallelExecution implements Runnable {
@@ -13,7 +14,8 @@ class ParallelExecution implements Runnable {
 
     public static void main(String[] args) {
         N = 8192;
-        int nThreads = 1;
+        int nThreads = 8;
+        Interface.loadLibraries("fftw3", "jfftw");
         Complex in = new Complex(N);
         Complex out = new Complex(N);
         plan = new Plan(in, out, Plan.Sign.POSITIVE, Flag.combine(Flag.MEASURE), N);

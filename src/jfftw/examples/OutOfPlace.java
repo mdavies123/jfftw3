@@ -2,6 +2,7 @@ package jfftw.examples;
 
 import jfftw.Complex;
 import jfftw.Flag;
+import jfftw.Interface;
 import jfftw.Plan;
 
 import java.nio.DoubleBuffer;
@@ -10,6 +11,7 @@ class OutOfPlace {
 
     public static void main(String[] args) {
         int N = 4096;
+        Interface.loadLibraries("fftw3", "jfftw");
         double[] inArr = new double[N * 2];
         Complex in = new Complex(inArr);
         Complex out = new Complex(N);
