@@ -53,7 +53,15 @@ dkms.conf
 
 # Java stuff
 out/
+doc/
 *.class
+*.jar
 
-#IntelliJ stuff
+# IntelliJ stuff
 .idea/
+bin/
+
+# Eclipse stuff
+.classpath
+.project
+

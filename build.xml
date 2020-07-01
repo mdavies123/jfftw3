@@ -1,0 +1,43 @@
+<project name="jfftw" basedir="." default="all">
+	
+    <property name="class.dir"   value="bin"/>
+    <property name="jar.dir"     value="."/>
+	<property name="src.dir"	 value="src"/>
+	<property name="doc.dir"	 value="doc"/>
+	
+    <target name="clean" description="remove compiled files">
+        <delete file="${jar.dir}/${ant.project.name}.jar" />
+    	<delete dir="${class.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean" description="compile java code">
+        <mkdir dir="${class.dir}"/>
+        <javac includeantruntime="false" srcdir="${src.dir}" includes="**" destdir="${class.dir}"
+            debug="true" nowarn="true">
+        	<exclude name="**/examples/**"/>
+        <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+	
+    <target name="doc" depends="clean" description="generate documentation">
+        <mkdir dir="${doc.dir}" />
+        <javadoc sourcepath="${src.dir}" useexternalfile="yes" destdir="${doc.dir}">
+        </javadoc>
+    </target>
+
+    <target name="jar" depends="compile, doc" description="package compiled and source code">
+        <tstamp>
+            <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+        </tstamp>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Built-Date" value="${TODAY}"/>
+                <attribute name="Class-Path" value="${jar.classpath}"/>
+            </manifest>
+        </jar>
+    </target>
+	
+	<target name="all" depends="clean, compile, doc, jar" />
+
+</project>
