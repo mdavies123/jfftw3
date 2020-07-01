@@ -180,6 +180,22 @@ The [Wisdom](src/jfftw/Wisdom.java) class facilitates the import and export of F
 
 See the [examples package](src/jfftw/examples/) for some other use cases.
 
+### Guru Interface
+
+FFTW implements a [Guru Interface](http://www.fftw.org/fftw3_doc/Guru-Interface.html) to offer maximum flexibility over the transforms FFTW computes.
+
+This interface is implemented in this library by the [Guru](src/jfftw/Guru.java) and [Guru64](src/jfftw/Guru64.java) classes. The Guru Interface introduces a new fftw_iodim datastructure implemented in the `Guru.Dimension` subclass. You must pass two arrays of these dimensions to the Guru interface when creating a plan. The first array describes the transform dimensions, while the second array describes the [vector](http://www.fftw.org/fftw3_doc/Guru-vector-and-transform-sizes.html#Guru-vector-and-transform-sizes) dimensions.
+
+You must create Guru Plans statically like so:
+
+```Java
+int n0 = 4096, n1 = 32, n2 = 16;
+Complex ci = new Complex(n0 * n1 * n2);
+Plan.Dimension[] transform = Guru.makeDimensions(new int[] {n0, n1, n2}, new int[] {1, 1, 1}, new int[] {1, 1, 1});
+Plan.Dimension[] vector = Guru.makeDimensions(new int[0], new int[0], new int[0]); // only one transform so rank = 0
+Plan p = Guru.plan(transform, vector, ci, ci, sign, flags);
+```
+
 # A Note on Thread Safety
 
 The only thread-safe routine in FFTW is `fftw_execute` and its new array execute variants. This library enforces thread safety by prepending the `synchronized` keyword to all of its native methods except for the plan execution methods. As a result, you should be able to leverage Java parallelism for execution. However, please understand that planning routines may hold locks for an extended period of time.
