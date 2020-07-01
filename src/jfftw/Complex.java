@@ -2,7 +2,7 @@ package jfftw;
 
 import java.nio.ByteOrder;
 
-public class Complex extends Value {
+public class Complex extends Interleave {
 
 	/**
 	 * Creates a new Complex array backed by a direct DoubleBuffer of size n * 2.

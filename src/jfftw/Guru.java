@@ -32,7 +32,7 @@ public class Guru {
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Value i, Value o, Sign s, int f) {
+    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
         return new Plan(dims, hmDims, i, o, s, f);
     }
 
@@ -47,13 +47,13 @@ public class Guru {
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, SplitArray i, SplitArray o, Sign s, int f) {
-        return new Plan(dims, hmDims, i, o, s, f);
+    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split i, Split o, int f) {
+        return new Plan(dims, hmDims, i, o, f);
     }
 
     /**
      * The guru interface introduces one basic new data structure, fftw_iodim, that is used to specify sizes and strides
-     * for multi-dimensional transforms and vectors. This class implements that new data structure.
+     * for multi-dimensional transforms and vectors. This subclass implements that new data structure.
      */
     public static class Dimension {
         public final int n, is, os;

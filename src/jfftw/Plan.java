@@ -11,8 +11,8 @@ public class Plan {
 	protected final Sign sign;
 	protected final Complexity complexity;
 	protected final Placement placement;
-	protected final SplitArray splitInput, splitOutput;
-	protected final Value input, output;
+	protected final Split splitInput, splitOutput;
+	protected final Interleave input, output;
 	protected final long address, size;
 	protected final int[] dimensions;
 	protected final int rank, flags;
@@ -28,7 +28,7 @@ public class Plan {
 	 * @param f FFTW flags
 	 * @param n variable number of dimensions
 	 */
-	public Plan(Value i, Value o, Sign s, int f, int... n) {
+	public Plan(Interleave i, Interleave o, Sign s, int f, int... n) {
 		input = i;
 		output = o;
 		sign = s;
@@ -63,7 +63,7 @@ public class Plan {
 	 * @param s			sign (ignored if the transform is C2R or R2C)
 	 * @param f			flags
 	 */
-	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Value i, Value o, Sign s, int f) {
+	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
 		input = i;
 		output = o;
 		sign = s;
@@ -100,7 +100,7 @@ public class Plan {
 	 * @param s			sign (ignored if the transform is C2R or R2C)
 	 * @param f			flags
 	 */
-	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Value i, Value o, Sign s, int f) {
+	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
 		input = i;
 		output = o;
 		sign = s;
@@ -134,13 +134,12 @@ public class Plan {
 	 * @param hmDims	array of vector dimensions
 	 * @param in		complex or real split array input
 	 * @param out		complex or real split array output
-	 * @param s			sign (ignored if the transform is C2R or R2C)
 	 * @param f			flags
 	 */
-	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, SplitArray in, SplitArray out, Sign s, int f) {
+	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split in, Split out, int f) {
 		input = null;
 		output = null;
-		sign = s;
+		sign = Sign.NEGATIVE;
 		complexity = determineSplitComplexity(in, out);
 		placement = in == out ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
 		rank = dims.length;
@@ -171,7 +170,7 @@ public class Plan {
 	 * @param s			sign (ignored if the transform is C2R or R2C)
 	 * @param f			flags
 	 */
-	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, SplitArray in, SplitArray out, Sign s, int f) {
+	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Split in, Split out, Sign s, int f) {
 		input = null;
 		output = null;
 		sign = s;
@@ -202,7 +201,7 @@ public class Plan {
 	 * @param o	output
 	 * @return	the complexity of the input and output plans
 	 */
-	private static Complexity determineSplitComplexity(SplitArray i, SplitArray o) {
+	private static Complexity determineSplitComplexity(Split i, Split o) {
 		if (i.im != null) {
 			if (o.im != null) {
 				return Complexity.COMPLEX_TO_COMPLEX;
@@ -224,7 +223,7 @@ public class Plan {
 	 * @param output	output
 	 * @return			the placement of the two arrays
 	 */
-	private static Placement determinePlacement(Value input, Value output) {
+	private static Placement determinePlacement(Interleave input, Interleave output) {
 		if (input == output) // intentionally compare the address of these Values
 			return Placement.IN_PLACE;
 		return Placement.OUT_OF_PLACE;
@@ -236,7 +235,7 @@ public class Plan {
 	 * @param output	output
 	 * @return			the complexity of the two arrays
 	 */
-	private static Complexity determineComplexity(Value input, Value output) {
+	private static Complexity determineComplexity(Interleave input, Interleave output) {
 		if (input instanceof Complex) {
 			if (output instanceof Complex) {
 				return Complexity.COMPLEX_TO_COMPLEX;
@@ -256,7 +255,7 @@ public class Plan {
 	 * @param i	interleaved input
 	 * @param o	interleaved output
 	 */
-	private void validate(Complexity t, Value i, Value o) {
+	private void validate(Complexity t, Interleave i, Interleave o) {
 		if (destroyed)
 			throw new NullPointerException("attempted to execute destroyed plan");
 		int in = i.size(), out = o.size();
@@ -370,7 +369,7 @@ public class Plan {
 	private long guruSplitCreate(Guru.Dimension[] dims, Guru.Dimension[] hmDims) {
 		switch (complexity) {
 			case COMPLEX_TO_COMPLEX:
-				return jfftw_plan_guru_dft_split(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, splitOutput.im, sign.value, flags);
+				return jfftw_plan_guru_dft_split(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, splitOutput.im, flags);
 			case COMPLEX_TO_REAL:
 				return jfftw_plan_guru_dft_split_c2r(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, flags);
 			case REAL_TO_COMPLEX:
@@ -520,7 +519,7 @@ public class Plan {
 	 * @param i	new split array input
 	 * @param o	new split array output
 	 */
-	public void execute(SplitArray i, SplitArray o) {
+	public void execute(Split i, Split o) {
 		if (!destroyed) {
 			if (isGuruPlan && isSplitArrayPlan) {
 				switch (complexity) {
@@ -648,7 +647,7 @@ public class Plan {
 	/**
 	 * @return	split input arrays, null if this plan is not a split array plan
 	 */
-	public final SplitArray getSplitInput() {
+	public final Split getSplitInput() {
 		if (isSplitArrayPlan)
 			return splitInput;
 		else
@@ -658,7 +657,7 @@ public class Plan {
 	/**
 	 * @return	split output arrays, null if this plan is not a split array plan
 	 */
-	public final SplitArray getSplitOutput() {
+	public final Split getSplitOutput() {
 		if (isSplitArrayPlan)
 			return splitOutput;
 		else

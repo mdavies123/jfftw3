@@ -2,13 +2,13 @@ package jfftw;
 
 import java.nio.DoubleBuffer;
 
-abstract class Value {
+abstract class Interleave {
 
     protected DoubleBuffer buff;
     protected int size;
 
     /**
-     * Returns this size of this Value's transformmable array.
+     * Returns this size of this Interleave's transformable array.
      * 
      * @return	size
      */
@@ -17,7 +17,7 @@ abstract class Value {
     }
 
     /**
-     * Gives access to the DoubleBuffer backing this Value.
+     * Gives access to the DoubleBuffer backing this Interleave.
      * 
      * @return	DoubleBuffer backing this value
      */
@@ -27,7 +27,7 @@ abstract class Value {
 
     /**
      * Returns the result of calling the `fftw_alignment_of` function upon
-     * this value.
+     * this Interleave.
      * 
      * @return	array alignment
      */

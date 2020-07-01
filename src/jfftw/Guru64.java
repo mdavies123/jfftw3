@@ -32,7 +32,7 @@ public class Guru64 {
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Value i, Value o, Sign s, int f) {
+    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
         return new Plan(dims, hmDims, i, o, s, f);
     }
 
@@ -43,17 +43,16 @@ public class Guru64 {
      * @param hmDims	array of vector dimensions
      * @param i	    	complex or real split array input
      * @param o 		complex or real split array output
-     * @param s			sign (ignored if the transform is C2R or R2C)
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, SplitArray i, SplitArray o, Sign s, int f) {
-        return new Plan(dims, hmDims, i, o, s, f);
+    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split i, Split o, int f) {
+        return new Plan(dims, hmDims, i, o, f);
     }
 
     /**
      * The fftw_iodim64 type is similar to fftw_iodim, with the same interpretation, except that it uses type ptrdiff_t
-     * instead of type int. This class implements that data structure.
+     * instead of type int. This subclass implements that data structure.
      */
     public static class Dimension {
         public final long n, is, os;

@@ -8,7 +8,7 @@ public class Interface {
 
     protected static boolean isLoaded = false;
 
-    protected static synchronized native int jfftw_alignment_of(Value v);
+    protected static synchronized native int jfftw_alignment_of(Interleave v);
 
     protected static synchronized native ByteBuffer jfftw_allocate_complex_buffer(long n);
 
@@ -102,7 +102,7 @@ public class Interface {
 
     protected static synchronized native long jfftw_plan_guru_dft_r2c(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Real in, Complex out, int flags);
 
-    protected static synchronized native long jfftw_plan_guru_dft_split(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int sign, int flags);
+    protected static synchronized native long jfftw_plan_guru_dft_split(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int flags);
 
     protected static synchronized native long jfftw_plan_guru_dft_split_c2r(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, int flags);
 

@@ -2,7 +2,7 @@ package jfftw;
 
 import java.nio.ByteOrder;
 
-public class Real extends Value {
+public class Real extends Interleave {
 
 	/**
 	 * Creates a new Real array backed by a direct DoubleBuffer of size n.
