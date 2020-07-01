@@ -19,7 +19,7 @@ class MultiDimensional {
         Complex cplx_2d = new Complex(n0 * n1);
         Plan p_2d = new Plan(cplx_2d, cplx_2d, Sign.POSITIVE, 0, n0, n1);
 
-        Interface.initThreads(null);
+        Interface.initThreads("fftw3_omp");
         Interface.planWithNThreads(8);
 
         Complex cplx_6d = new Complex(n0 * n1 * n2 * n3 * n4 * n5);
