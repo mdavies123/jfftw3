@@ -9,7 +9,7 @@ CC = gcc
 PLATFORM = linux
 
 # path to the java include directory
-JAVAINCL = /usr/local/java/latest/include
+JAVAINCL = /usr/lib/jvm/java/include
 
 # path to the FFTW3 include directory
 FFTWINCL = /usr/local/include

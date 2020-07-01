@@ -2,7 +2,7 @@ package jfftw.examples;
 
 import jfftw.Complex;
 
-import static jfftw.Plan.Sign;
+import jfftw.Sign;
 import static jfftw.Plan.Complexity;
 import jfftw.Interface;
 import jfftw.Plan;
@@ -18,7 +18,7 @@ class InPlace {
         Plan p = new Plan(cplx, cplx, Sign.POSITIVE, 0, N);
         p.execute();
         p.fprint(new File("plan.txt"));
-        Complexity t = p.getType();
+        Complexity t = p.getComplexity();
         System.out.println(t);
     }
 

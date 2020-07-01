@@ -33,7 +33,6 @@
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Built-Date" value="${TODAY}"/>
-                <attribute name="Class-Path" value="${jar.classpath}"/>
             </manifest>
         </jar>
     </target>

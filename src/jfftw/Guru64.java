@@ -1,17 +1,17 @@
 package jfftw;
 
-public class Guru {
+public class Guru64 {
 
     /**
-     * Combines the input dimension size, input strides, and output strides arrays into an array of Guru.Dimension
-     * objects for use in the Guru interface.
+     * Combines the input dimension size, input strides, and output strides arrays into an array of Guru64.Dimension
+     * objects for use in the Guru64 interface.
      *
      * @param n     array of dimension sizes
      * @param is    array of input strides
      * @param os    array of output strides
-     * @return      Guru.Dimension[] used in the Guru interface
+     * @return      Guru64.Dimension[] used in the Guru64 interface
      */
-    public static Dimension[] makeDimensions(int[] n, int[] is, int[] os) {
+    public static Dimension[] makeDimensions(long[] n, long[] is, long[] os) {
         int howMany = n.length;
         if (howMany != is.length || howMany != os.length)
             throw new IllegalArgumentException("inputs are not the same length");
@@ -22,7 +22,7 @@ public class Guru {
     }
 
     /**
-     * Creates a new Plan using the Guru interface.
+     * Creates a new Plan using the Guru64 interface.
      *
      * @param dims		array of transform dimensions
      * @param hmDims	array of vector dimensions
@@ -37,7 +37,7 @@ public class Guru {
     }
 
     /**
-     * Creates a new Plan using the Guru interface and split arrays.
+     * Creates a new Plan using the Guru64 interface and split arrays.
      *
      * @param dims		array of transform dimensions
      * @param hmDims	array of vector dimensions
@@ -52,16 +52,15 @@ public class Guru {
     }
 
     /**
-     * The guru interface introduces one basic new data structure, fftw_iodim, that is used to specify sizes and strides
-     * for multi-dimensional transforms and vectors. This class implements that new data structure.
+     * The fftw_iodim64 type is similar to fftw_iodim, with the same interpretation, except that it uses type ptrdiff_t
+     * instead of type int. This class implements that data structure.
      */
     public static class Dimension {
-        public final int n, is, os;
-        protected Dimension(int n, int is, int os) {
+        public final long n, is, os;
+        protected Dimension(long n, long is, long os) {
             this.n = n;
             this.is = is;
             this.os = os;
         }
     }
-
 }

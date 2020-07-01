@@ -2,6 +2,7 @@ package jfftw;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 
 public class Interface {
 
@@ -30,6 +31,12 @@ public class Interface {
     protected static native void jfftw_execute_dft_c2r(Plan p, Complex ci, Real ro);
 
     protected static native void jfftw_execute_dft_r2c(Plan p, Real ri, Complex co);
+
+    protected static native void jfftw_execute_split_dft(Plan p, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io);
+
+    protected static native void jfftw_execute_split_dft_c2r(Plan p, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro);
+
+    protected static native void jfftw_execute_split_dft_r2c(Plan p, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io);
 
     protected static native void jfftw_execute_r2r(Plan p, Real ri, Real ro);
 
@@ -88,6 +95,30 @@ public class Interface {
     protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, Real in, Complex out, int flags);
 
     protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, Real in, Complex out, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Complex in, Complex out, int sign, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft_c2r(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Complex in, Real out, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft_r2c(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Real in, Complex out, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft_split(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int sign, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft_split_c2r(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, int flags);
+
+    protected static synchronized native long jfftw_plan_guru_dft_split_r2c(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, Complex in, Complex out, int sign, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft_c2r(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, Complex in, Real out, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft_r2c(int rank, Guru64.Dimension[] ims, int howmany_rank, Guru64.Dimension[] howmany_dims, Real in, Complex out, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft_split(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int sign, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft_split_c2r(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, int flags);
+
+    protected static synchronized native long jfftw_plan_guru64_dft_split_r2c(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io, int flags);
 
     /**
      * Cleans up FFTW internal state as if the program just began.
