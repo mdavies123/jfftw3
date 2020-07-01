@@ -352,10 +352,10 @@ JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1sprint_1plan
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft
   (JNIEnv *env, jclass class, jint rank, jintArray n, jobject i, jobject o, jint sign, jint flags) {
-    jint* nums = (*env)->GetIntArrayElements(env, n, 0);
+    int *nums = (*env)->GetPrimitiveArrayCritical(env, n, 0);
     _PRE_PLAN
     fftw_plan p = fftw_plan_dft(rank, nums, (fftw_complex*) in, (fftw_complex*) out, sign, flags);
-    (*env)->ReleaseIntArrayElements(env, n, nums, JNI_COMMIT);
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
     return (jlong) p;
 }
 
@@ -402,10 +402,10 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_13d
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
   (JNIEnv *env, jclass class, jint rank, jintArray n, jobject i, jobject o, jint flags) {
-    int* nums = (*env)->GetIntArrayElements(env, n, 0);
+    int *nums = (*env)->GetPrimitiveArrayCritical(env, n, 0);
     _PRE_PLAN
     fftw_plan p = fftw_plan_dft_c2r(rank, nums, (fftw_complex*) in, out, flags);
-    (*env)->ReleaseIntArrayElements(env, n, nums, JNI_COMMIT);
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
     return (jlong) p;
 }
 
@@ -452,10 +452,10 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_13d
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
   (JNIEnv *env, jclass class, jint rank, jintArray n, jobject i, jobject o, jint flags) {
-    int* nums = (*env)->GetIntArrayElements(env, n, 0);
+    int *nums = (*env)->GetPrimitiveArrayCritical(env, n, 0);
     _PRE_PLAN
     fftw_plan p = fftw_plan_dft_r2c(rank, nums, in, (fftw_complex*) out, flags);
-    (*env)->ReleaseIntArrayElements(env, n, nums, JNI_COMMIT);
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
     return (jlong) p;
 }
 
