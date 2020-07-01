@@ -75,13 +75,13 @@ for (int i = 0; i < N; i++) {
 }
 ```
 
-Both the `Complex` and `Real` objects extend the package-private `Value` class, and can be passed to the `Plan` constructor as shown in the next section.
+Both the `Complex` and `Real` objects extend the package-private `Interleave` class, and can be passed to the `Plan` constructor as shown in the next section.
 
 ### Plans
 
 FFTW implements a [planning](http://www.fftw.org/fftw3_doc/Using-Plans.html#Using-Plans) feature which produces a plan containing "all information necessary to compute the transform, including the pointers to the input and output arrays."
 
-In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the address of the `fftw_plan` in native code, and references to direct `DoubleBuffers` which contain the complex or real data for transformation. The memory allocated to these `DoubleBuffers` in the JVM will be the same memory accessible to FFTW in native code. This reduces the overhead of copying arrays back and forth between  native code and the JVM.
+In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the address of the `fftw_plan` in native code, and references to direct `DoubleBuffers` which contain the complex or real data for transformation. The memory allocated to these `DoubleBuffers` in the JVM will be the same memory accessible to FFTW in native code. This reduces the overhead of copying arrays back and forth between native code and the JVM.
 
 New array execute functions are provided in the [Plan](src/jfftw/Plan.java) class. The inputs to these methods must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
 
@@ -106,7 +106,7 @@ int flags = Flag.combine(Flag.PRESERVE_INPUT, Flag.MEASURE);
 Now you can create a plan:
 
 ```Java
-Plan p = new Plan(ci, ro, Plan.Sign.NEGATIVE, flags, N);
+Plan p = new Plan(ci, ro, Sign.NEGATIVE, flags, N);
 ```
 
 Populate your input:
@@ -184,7 +184,7 @@ See the [examples package](src/jfftw/examples/) for some other use cases.
 
 FFTW implements a [Guru Interface](http://www.fftw.org/fftw3_doc/Guru-Interface.html) to offer maximum flexibility over the transforms FFTW computes.
 
-This interface is implemented in this library by the [Guru](src/jfftw/Guru.java) and [Guru64](src/jfftw/Guru64.java) classes. The Guru Interface introduces a new fftw_iodim datastructure implemented in the `Guru.Dimension` subclass. You must pass two arrays of these dimensions to the Guru interface when creating a plan. The first array describes the transform dimensions, while the second array describes the [vector](http://www.fftw.org/fftw3_doc/Guru-vector-and-transform-sizes.html#Guru-vector-and-transform-sizes) dimensions.
+This interface is implemented in this library by the [Guru](src/jfftw/Guru.java) and [Guru64](src/jfftw/Guru64.java) classes. The Guru Interface introduces a new `fftw_iodim` datastructure implemented in the `Guru.Dimension` subclass. You must pass two arrays of these dimensions to the Guru interface when creating a plan. The first array describes the transform dimensions, while the second array describes the [vector](http://www.fftw.org/fftw3_doc/Guru-vector-and-transform-sizes.html#Guru-vector-and-transform-sizes) dimensions.
 
 You must create Guru Plans statically like so:
 
@@ -207,7 +207,7 @@ int N = 8192, nthreads = 8;
 Complex in = new Complex(N);
 Complex out = new Complex(N);
 int flags = Flag.combine(Flag.MEASURE);
-Plan p = new Plan(in, out, Plan.Sign.NEGATIVE, flags, N);
+Plan p = new Plan(in, out, Sign.NEGATIVE, flags, N);
 for (int i = 0; i < nthreads; i++) {
   new Thread(new Runnable() {
     public void run() {
