@@ -16,13 +16,17 @@ _GET_BUFFERS
 
 #define _GET_GURU_DIMS \
 fftw_iodim *dims = malloc(sizeof(fftw_iodim) * rank); \
-fftw_iodim *hmdims = malloc(sizeof(fftw_iodim) * rank); \
-get_dims(env, rank, jdims, jhmdims, dims, hmdims);
+fftw_iodim *hmdims = NULL; \
+if (howmany > 0) \
+    hmdims = malloc(sizeof(fftw_iodim) * howmany); \
+get_dims(env, rank, jdims, howmany, jhmdims, dims, hmdims);
 
 #define _GET_GURU64_DIMS \
 fftw_iodim64 *dims = malloc(sizeof(fftw_iodim64) * rank); \
-fftw_iodim64 *hmdims = malloc(sizeof(fftw_iodim64) * rank); \
-get_dims64(env, rank, jdims, jhmdims, dims, hmdims);
+fftw_iodim64 *hmdims = NULL; \
+if (howmany > 0) \
+    hmdims = malloc(sizeof(fftw_iodim64) * howmany); \
+get_dims64(env, rank, jdims, howmany, jhmdims, dims, hmdims);
 
 double * get_buffer(JNIEnv *env, jobject v) {
     jclass c = (*env)->GetObjectClass(env, v);
@@ -38,17 +42,21 @@ fftw_plan get_fftw_plan(JNIEnv *env, jobject p) {
 }
 
 void get_dims
-  (JNIEnv *env, jint rank, jobjectArray jdims, jobjectArray jhmdims, fftw_iodim *dims, fftw_iodim *hmdims) {
+  (JNIEnv *env, jint rank, jobjectArray jdims, jint howmany, jobjectArray jhmdims, fftw_iodim *dims, fftw_iodim *hmdims) {
+    jclass jcls;
+    jfieldID jfid;
     for (int i = 0; i < rank; i++) {
         jobject jdim = (*env)->GetObjectArrayElement(env, jdims, i);
-        jobject jhmdim = (*env)->GetObjectArrayElement(env, jhmdims, i);
-        jclass jcls = (*env)->GetObjectClass(env, jdim);
-        jfieldID jfid = (*env)->GetFieldID(env, jcls, "is", "I");
+        jcls = (*env)->GetObjectClass(env, jdim);
+        jfid = (*env)->GetFieldID(env, jcls, "is", "I");
         dims[i].is = (*env)->GetIntField(env, jdim, jfid);
         jfid = (*env)->GetFieldID(env, jcls, "os", "I");
         dims[i].os = (*env)->GetIntField(env, jdim, jfid);
         jfid = (*env)->GetFieldID(env, jcls, "n", "I");
         dims[i].n = (*env)->GetIntField(env, jdim, jfid);
+    }
+    for (int i = 0; i < howmany; i++) {
+        jobject jhmdim = (*env)->GetObjectArrayElement(env, jhmdims, i);
         jcls = (*env)->GetObjectClass(env, jhmdim);
         jfid = (*env)->GetFieldID(env, jcls, "is", "I");
         hmdims[i].is = (*env)->GetIntField(env, jhmdim, jfid);
@@ -60,17 +68,21 @@ void get_dims
 }
 
 void get_dims64
-  (JNIEnv *env, jint rank, jobjectArray jdims, jobjectArray jhmdims, fftw_iodim64 *dims, fftw_iodim64 *hmdims) {
+  (JNIEnv *env, jint rank, jobjectArray jdims, jint howmany, jobjectArray jhmdims, fftw_iodim64 *dims, fftw_iodim64 *hmdims) {
+    jclass jcls;
+    jfieldID jfid;
     for (int i = 0; i < rank; i++) {
         jobject jdim = (*env)->GetObjectArrayElement(env, jdims, i);
-        jobject jhmdim = (*env)->GetObjectArrayElement(env, jhmdims, i);
-        jclass jcls = (*env)->GetObjectClass(env, jdim);
-        jfieldID jfid = (*env)->GetFieldID(env, jcls, "is", "J");
+        jcls = (*env)->GetObjectClass(env, jdim);
+        jfid = (*env)->GetFieldID(env, jcls, "is", "J");
         dims[i].is = (*env)->GetLongField(env, jdim, jfid);
         jfid = (*env)->GetFieldID(env, jcls, "os", "J");
         dims[i].os = (*env)->GetLongField(env, jdim, jfid);
         jfid = (*env)->GetFieldID(env, jcls, "n", "J");
         dims[i].n = (*env)->GetLongField(env, jdim, jfid);
+    }
+    for (int i = 0; i < howmany; i++) {
+        jobject jhmdim = (*env)->GetObjectArrayElement(env, jhmdims, i);
         jcls = (*env)->GetObjectClass(env, jhmdim);
         jfid = (*env)->GetFieldID(env, jcls, "is", "J");
         hmdims[i].is = (*env)->GetLongField(env, jhmdim, jfid);
