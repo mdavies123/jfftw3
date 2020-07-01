@@ -33,6 +33,12 @@ public enum Flag {
         value = v;
     }
 
+    /**
+     * Combines 0 or more flags together usig a bitwise or operator.
+     * 
+     * @param flags		0 or more flags to combine
+     * @return			combined flags
+     */
     public static int combine(Flag... flags) {
         int i = 0;
         for (Flag f : flags)

@@ -5,10 +5,7 @@ import java.nio.ByteBuffer;
 
 public class Interface {
 
-    static {
-        System.loadLibrary("fftw3");
-        System.loadLibrary("jfftw");
-    }
+    protected static boolean isLoaded = false;
 
     protected static synchronized native int jfftw_alignment_of(Value v);
 
@@ -92,33 +89,80 @@ public class Interface {
 
     protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, Real in, Complex out, int flags);
 
+    /**
+     * Cleans up FFTW internal state as if the program just began.
+     */
     public static void cleanup() {
         jfftw_cleanup();
     }
 
+    /**
+     * Use to get rid of all memory and other resources allocated internally by FFTW.
+     * <p>
+     * You must not execute any previously created plans after calling this function.
+     */
     public static void cleanupThreads() {
         jfftw_cleanup_threads();
     }
 
-    public static void flops(Plan p, double[] add, double[] mul, double[] fmas) {
-        jfftw_flops(p, add, mul, fmas);
-    }
-
+    /**
+     * This function, which need only be called once, performs any one-time 
+     * initialization required to use threads on your system.
+     * <p>
+     * You may also specify the name of the FFTW native library (if any) which handles
+     * threads. If your FFTW threads library is built in to the main FFTW library,
+     * you may pass `null` in for this argument.
+     * 
+     * @param lib	name of the FFTW native library responsible for threads
+     */
     public static void initThreads(String lib) {
-        System.loadLibrary(lib);
+		if (lib != null)
+			System.loadLibrary(lib);
         jfftw_init_threads();
     }
 
+    /**
+     * Installs a hook that wraps a lock (chosen by FFTW) around all planner calls.
+     * <p>
+     * This method should be used only as a last resort or in situations where you
+     * cannot control other programs which may be creating plans concurrently.
+     */
     public static void makePlannerThreadSafe() {
         jfftw_make_planner_thread_safe();
     }
 
+    /**
+     * Specifies a number of threads to use in planning.
+     * 
+     * @param nthreads	number of threads
+     */
     public static void planWithNThreads(int nthreads) {
         jfftw_plan_with_nthreads(nthreads);
     }
 
+    /**
+     * Sets a rough timelimit for planning.
+     * 
+     * @param t	time in seconds
+     */
     public static void setTimelimit(double t) {
         jfftw_set_timelimit(t);
     }
+	
+    /**
+     * Loads the native FFTW and JFFTW libraries.
+     * <p>
+     * These native libraries must be in the JVM's java.library.path directory.
+     * 
+     * @param fftw		name of the FFTW library
+     * @param jfftw		name of the JFFTW library
+     */
+	public static void loadLibraries(String fftw, String jfftw) {
+		if (!isLoaded) {
+			System.loadLibrary(fftw);
+			System.loadLibrary(jfftw);
+			isLoaded = true;
+		}
+	}
 
 }
