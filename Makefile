@@ -6,10 +6,10 @@
 CC = gcc
 
 # linux, win32, or darwin
-PLATFORM = linux
+PLATFORM = win32
 
 # path to the java include directory
-JAVAINCL = /usr/lib/jvm/java/include
+JAVAINCL = /usr/local/java/latest/include
 
 # path to the FFTW3 include directory
 FFTWINCL = /usr/local/include
@@ -19,15 +19,15 @@ FFTWLIBDIR = /usr/local/lib
 
 # FFTW3 library name
 # usually 'fftw3' but the precompiled win32 binary may be 'fftw3-3'
-FFTWLIBNM = fftw3
+FFTWLIBNM = fftw3-3
 
 # shared library target
-TARGET = libjfftw.so
+TARGET = jfftw.dll
 
 # FFTW thread library name
 # leave this blank if you compiled FFTW with '--with-combined-threads' or if you did
 # not compile with openmp or threads at all
-FFTWLIBTHREAD = fftw3_omp
+FFTWLIBTHREAD =
 
 ####################################################################################
 # probably no need to change things below this line                                #
@@ -35,7 +35,7 @@ FFTWLIBTHREAD = fftw3_omp
 
 SRCS = $(wildcard src/c/*.c)
 OBJS = $(SRCS:.c=.o)
-CFLAGS = -march=native -O3 -fPIC -Isrc/c/ -I"$(JAVAINCL)" -I"$(JAVAINCL)/$(PLATFORM)" -I"$(FFTWINCL)" -Wall -std=c11 
+CFLAGS = -O3 -fPIC -Isrc/c/ -I"$(JAVAINCL)" -I"$(JAVAINCL)/$(PLATFORM)" -I"$(FFTWINCL)" -Wall -std=c11 
 LDFLAGS = -shared -l$(FFTWLIBNM) -L"$(FFTWLIBDIR)" -Wall
 
 ifeq ($(FFTWLIBTHREAD),fftw3_omp)

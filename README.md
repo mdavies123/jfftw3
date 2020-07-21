@@ -46,9 +46,39 @@ Include `jfftw.jar` in your Java project as you would any other `.jar` library.
 
 The JNI shared library you built above as well as the FFTW3 shared library must be in your project's `java.library.path` directory. You may load these native libraries using the `loadLibraries` method found in the [Interface](src/jfftw/Interface.java) class.
 
-## Usage
+# Usage
 
-### Datatypes
+This library is meant to give the user as much control over FFTW as possible while maintaining most Java semantics. For instance, we can directly translate the C code below:
+
+```C
+int N = 1024;
+fftw_complex *cin = fftw_malloc(sizeof(fftw_complex) * N);
+fftw_complex *cout = fftw_malloc(sizeof(fftw_complex) * N);
+fftw_plan plan = fftw_plan_dft_1d(N, cin, cout, FFTW_FORWARD, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
+fftw_execute(plan);
+fftw_destroy_plan(plan);
+```
+
+Into Java:
+
+```Java
+int N = 1024;
+Complex cin = new Complex(N);
+Complex cout = new Complex(N);
+Plan p = new Plan(cin, cout, Sign.NEGATIVE, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), N);
+p.execute();
+p.destroy();
+```
+
+Both these snippets will create two complex interleaved arrays of size 1024, a new plan using those arrays and user specific flags, and execute the plan. Note that the Plan objects in Java handle their own construction, execution, modification, and destruction. Calling the `execute` method on a Plan object is directly equivalent to calling the `fftw_execute` function on an `fftw_plan` in C. 
+
+In a similar vein, an effort was made to reduce some of the redundancy that would arise from this object-oriented approach to FFTW. Instead of a function like `fftw_execute_dft_c2r` for the new array execute functions in C, Java allows us to overload an object's methods to ensure a concise naming scheme:
+
+`fftw_execute_dft_c2r(plan, (fftw_complex *) ci, (double *) ro)` becomes `plan.execute((Complex) ci, (Real) ro)`
+
+The information conveyed by the function name in C is instead conveyed by the method signature in Java.
+
+## Datatypes
 
 This library implements two objects, [Complex](src/jfftw/Complex.java) and [Real](src/jfftw/Real.java), to represent the data you wish to transform.
 
@@ -77,7 +107,7 @@ for (int i = 0; i < N; i++) {
 
 Both the `Complex` and `Real` objects extend the package-private `Interleave` class, and can be passed to the `Plan` constructor as shown in the next section.
 
-### Plans
+## Plans
 
 FFTW implements a [planning](http://www.fftw.org/fftw3_doc/Using-Plans.html#Using-Plans) feature which produces a plan containing "all information necessary to compute the transform, including the pointers to the input and output arrays."
 
@@ -85,7 +115,7 @@ In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the add
 
 New array execute functions are provided in the [Plan](src/jfftw/Plan.java) class. The inputs to these methods must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
 
-#### Plan Creation
+### Plan Creation
 
 To create a [Plan](src/jfftw/Plan.java), you must first construct input and output arrays. Note that "you must create the plan before initializing the input, because FFTW_MEASURE overwrites the in/out arrays. (Technically, FFTW_ESTIMATE does not touch your arrays, but you should always create plans first just to be sure.)"
 
@@ -150,7 +180,7 @@ for (double d = out.get(); out.hasRemaining(); d = out.get())
   doSomething(d);
 ```
 
-### Flags
+## Flags
 
 From the [FFTW doc](http://www.fftw.org/fftw3_doc/Planner-Flags.html):
 
@@ -170,17 +200,17 @@ From the [FFTW doc](http://www.fftw.org/fftw3_doc/Planner-Flags.html):
 
 These flags are implemented as an Enum class in [Flag](src/jfftw/Flag.java).
 
-### Wisdom
+## Wisdom
 
 FFTW uses [wisdom](http://www.fftw.org/fftw3_doc/Wisdom.html#Wisdom) to save and reuse plans from storage.
 
 The [Wisdom](src/jfftw/Wisdom.java) class facilitates the import and export of FFTW wisdom. 
 
-### Examples
+# Examples
 
 See the [examples package](src/jfftw/examples/) for some other use cases.
 
-### Guru Interface
+# Guru Interface
 
 FFTW implements a [Guru Interface](http://www.fftw.org/fftw3_doc/Guru-Interface.html) to offer maximum flexibility over the transforms FFTW computes.
 
@@ -191,10 +221,12 @@ You must create Guru Plans statically like so:
 ```Java
 int n0 = 4096, n1 = 32, n2 = 16;
 Complex ci = new Complex(n0 * n1 * n2);
-Plan.Dimension[] transform = Guru.makeDimensions(new int[] {n0, n1, n2}, new int[] {1, 1, 1}, new int[] {1, 1, 1});
-Plan.Dimension[] vector = Guru.makeDimensions(new int[0], new int[0], new int[0]); // only one transform so rank = 0
-Plan p = Guru.plan(transform, vector, ci, ci, sign, flags);
+Guru.Dimension[] t = Guru.makeDimensions(new int[] {n0, n1, n2}, new int[] {1, 1, 1}, new int[] {1, 1, 1});
+Guru.Dimension[] v = Guru.makeDimensions(new int[0], new int[0], new int[0]); // only one transform so rank = 0
+Plan p = Guru.plan(t, v, ci, ci, sign, flags);
 ```
+
+Note: Java dimensions are generally specified with 32-bit integers, so this implementation of the 64-bit Guru interface most likely will not support the desired 64-bit transform sizes. However, these methods are available for completionist's sake, and as a future TODO. 
 
 # A Note on Thread Safety
 
@@ -207,13 +239,13 @@ int N = 8192, nthreads = 8;
 Complex in = new Complex(N);
 Complex out = new Complex(N);
 int flags = Flag.combine(Flag.MEASURE);
-Plan p = new Plan(in, out, Sign.NEGATIVE, flags, N);
+Plan plan = new Plan(in, out, Sign.NEGATIVE, flags, N);
 for (int i = 0; i < nthreads; i++) {
   new Thread(new Runnable() {
     public void run() {
       Complex input = new Complex(N);
       Complex output = new Complex(N);
-        plan.execute(input, output);
+      plan.execute(input, output);
     }
   }).start();
 }
