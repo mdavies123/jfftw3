@@ -146,9 +146,9 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1file
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_export_wisdom_to_filename
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1filename
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1filename
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -186,41 +186,41 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1fprint_1plan
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_system_wisdom
- * Signature: ()V
+ * Signature: ()Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
   (JNIEnv *, jclass);
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_file
- * Signature: (Ljava/io/File;)V
+ * Signature: (Ljava/io/File;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
   (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_filename
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1filename
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1filename
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_string
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1string
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1string
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_init_threads
- * Signature: ()V
+ * Signature: ()Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1init_1threads
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1init_1threads
   (JNIEnv *, jclass);
 
 /*

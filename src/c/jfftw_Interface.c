@@ -282,13 +282,14 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1split_1dft_1r2c
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_export_wisdom_to_filename
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1filename
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1filename
   (JNIEnv *env, jclass class, jstring s) {
     const char *fn = (*env)->GetStringUTFChars(env, s, 0);
-    fftw_export_wisdom_to_filename(fn);
+    jboolean success = fftw_export_wisdom_to_filename(fn) == 1;
     (*env)->ReleaseStringUTFChars(env, s, fn);
+    return success;
 }
 
 /*
@@ -342,61 +343,64 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1fprint_1plan
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_system_wisdom
- * Signature: ()V
+ * Signature: ()Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
   (JNIEnv *env, jclass class) {
-    fftw_import_system_wisdom();
+    return fftw_import_system_wisdom() == 1;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_file
- * Signature: (Ljava/io/File;)V
+ * Signature: (Ljava/io/File;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
   (JNIEnv *env, jclass class, jobject file) {
     jmethodID jmid = (*env)->GetMethodID(env, file, "getAbsolutePath", "java/lang/String;");
     jobject jstr = (*env)->CallObjectMethod(env, file, jmid);
     const char *path = (*env)->GetStringUTFChars(env, jstr, 0);
     FILE *f = fopen(path, "w+");
-    fftw_import_wisdom_from_file(f);
+    jboolean success = fftw_import_wisdom_from_file(f) == 1;
     fclose(f);
     (*env)->ReleaseStringUTFChars(env, jstr, path);
+    return success;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_filename
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1filename
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1filename
   (JNIEnv *env, jclass class, jstring s) {
     const char *fn = (*env)->GetStringUTFChars(env, s, 0);
-    fftw_import_wisdom_from_filename(fn);
+    jboolean success = fftw_import_wisdom_from_filename(fn) == 1;
     (*env)->ReleaseStringUTFChars(env, s, fn);
+    return success;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_import_wisdom_from_string
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1string
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1string
   (JNIEnv *env, jclass class, jstring s) {
     const char *str = (*env)->GetStringUTFChars(env, s, 0);
-    fftw_import_wisdom_from_string(str);
+    jboolean success = fftw_import_wisdom_from_string(str) == 1;
     (*env)->ReleaseStringUTFChars(env, s, str);
+    return success;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_init_threads
- * Signature: ()V
+ * Signature: ()Z
  */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1init_1threads
+JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1init_1threads
   (JNIEnv *env, jclass class) {
-    fftw_init_threads();
+    return fftw_init_threads() != 0;
 }
 
 /*
