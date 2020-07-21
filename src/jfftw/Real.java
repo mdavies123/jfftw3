@@ -1,6 +1,7 @@
 package jfftw;
 
 import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 
 public class Real extends Interleave {
 
@@ -25,6 +26,10 @@ public class Real extends Interleave {
     public Real(double[] in) {
         this(in.length);
         buff.put(in);
+    }
+    
+    protected Real(DoubleBuffer b) {
+    	buff = b;
     }
 
 }

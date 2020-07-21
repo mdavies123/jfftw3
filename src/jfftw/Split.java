@@ -3,38 +3,33 @@ package jfftw;
 import java.nio.DoubleBuffer;
 
 public class Split {
+	
+	public final DoubleBuffer re, im;
+	
+	/**
+	 * Allocates a new complex split array with real and imaginary DoubleBuffers.
+	 * 
+	 * @param n		transform size
+	 * @return		new Split array
+	 */
+	public static Split allocate(long n) {
+		DoubleBuffer re = Interface.jfftw_allocate_real_buffer(n).asDoubleBuffer();
+		DoubleBuffer im = Interface.jfftw_allocate_real_buffer(n).asDoubleBuffer();
+		return new Split(re, im);
+	}
+	
+	/**
+	 * Returns the transform size of this split array.
+	 * 
+	 * @return	transform size
+	 */
+	public int size() {
+		return re.capacity();
+	}
 
-    public final DoubleBuffer re, im;
-    public final boolean isComplex;
-
-    /**
-     * Allocates and returns a Split container backed by real and imaginary DoubleBuffers each of size n.
-     *
-     * @param n transform size
-     * @return  new complex split array
-     */
-    public static Split allocateComplex(long n) {
-        return new Split(n, true);
-    }
-
-    /**
-     * Allocates and returns a Split container backed by a real DoubleBuffer of size n.
-     * @param n transform size
-     * @return  new real split array
-     */
-    public static Split allocateReal(long n) {
-        return new Split(n, false);
-    }
-
-    /**
-     * Creates a new split array structure for use in the Guru interface.
-     *
-     * @param n         transform size
-     */
-    protected Split(long n, boolean c) {
-        isComplex = c;
-        re = Interface.jfftw_allocate_real_buffer(n).asDoubleBuffer();
-        im = isComplex ? Interface.jfftw_allocate_real_buffer(n).asDoubleBuffer() : null;
-    }
+	protected Split(DoubleBuffer re, DoubleBuffer im) {
+		this.re = re;
+		this.im = im;
+	}
 
 }

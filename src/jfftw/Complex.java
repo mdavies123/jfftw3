@@ -1,6 +1,7 @@
 package jfftw;
 
 import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 
 public class Complex extends Interleave {
 
@@ -25,6 +26,10 @@ public class Complex extends Interleave {
     public Complex(double[] in) {
         this(in.length / 2);
         buff.put(in);
+    }
+    
+    public Complex(DoubleBuffer b) {
+    	buff = b;
     }
 
 }

@@ -42,7 +42,7 @@ public class Interface {
 
     protected static synchronized native void jfftw_export_wisdom_to_file(File f);
 
-    protected static synchronized native void jfftw_export_wisdom_to_filename(String s);
+    protected static synchronized native boolean jfftw_export_wisdom_to_filename(String s);
 
     protected static synchronized native String jfftw_export_wisdom_to_string();
 
@@ -52,15 +52,15 @@ public class Interface {
 
     protected static synchronized native void jfftw_fprint_plan(Plan p, String s);
 
-    protected static synchronized native void jfftw_import_system_wisdom();
+    protected static synchronized native boolean jfftw_import_system_wisdom();
 
-    protected static synchronized native void jfftw_import_wisdom_from_file(File f);
+    protected static synchronized native boolean jfftw_import_wisdom_from_file(File f);
 
-    protected static synchronized native void jfftw_import_wisdom_from_filename(String s);
+    protected static synchronized native boolean jfftw_import_wisdom_from_filename(String s);
 
-    protected static synchronized native void jfftw_import_wisdom_from_string(String s);
+    protected static synchronized native boolean jfftw_import_wisdom_from_string(String s);
 
-    protected static synchronized native void jfftw_init_threads();
+    protected static synchronized native boolean jfftw_init_threads();
 
     protected static synchronized native void jfftw_make_planner_thread_safe();
 
@@ -145,11 +145,12 @@ public class Interface {
      * you may pass `null` in for this argument.
      * 
      * @param lib	name of the FFTW native library responsible for threads
+     * @return		true if threads loaded successfully, false otherwise
      */
-    public static void initThreads(String lib) {
+    public static boolean initThreads(String lib) {
 		if (lib != null)
 			System.loadLibrary(lib);
-        jfftw_init_threads();
+        return jfftw_init_threads();
     }
 
     /**

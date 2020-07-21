@@ -12,28 +12,73 @@ public class Plan {
 	protected final Complexity complexity;
 	protected final Placement placement;
 	protected final Split splitInput, splitOutput;
-	protected final Interleave input, output;
+	protected final Interleave interleavedInput, interleavedOutput;
 	protected final long address, size;
 	protected final int[] dimensions;
 	protected final int rank, flags;
 	protected final boolean isGuruPlan, isSplitArrayPlan;
 	protected boolean destroyed = false;
-
+	
 	/**
-	 * Constructs a new plan.
+	 * Constructs a new complex-to-complex plan.
 	 * 
-	 * @param i input complex or real array
-	 * @param o output complex or real array
+	 * @param i input complex interleaved array
+	 * @param o output complex interleaved array
 	 * @param s sign of the transform
 	 * @param f FFTW flags
-	 * @param n variable number of dimensions
+	 * @param n variable number of dimensions; defaults to `i.size()`
 	 */
-	public Plan(Interleave i, Interleave o, Sign s, int f, int... n) {
-		input = i;
-		output = o;
+	public Plan(Complex i, Complex o, Sign s, int f, int... n) {
+		this(i, o, s, Complexity.COMPLEX_TO_COMPLEX, f, n);
+	}
+	
+	/**
+	 * Constructs a new complex-to-real plan.
+	 * 
+	 * @param i input complex interleaved array
+	 * @param o output real interleaved array
+	 * @param s sign of the transform
+	 * @param f FFTW flags
+	 * @param n variable number of dimensions; defaults to `i.size()`
+	 */
+	public Plan(Complex i, Real o, Sign s, int f, int... n) {
+		this(i, o, s, Complexity.COMPLEX_TO_REAL, f, n);
+	}
+	
+	/**
+	 * Constructs a new real-to-complex plan.
+	 * 
+	 * @param i input real interleaved array
+	 * @param o output complex interleaved array
+	 * @param s sign of the transform
+	 * @param f FFTW flags
+	 * @param n variable number of dimensions; defaults to `i.size()`
+	 */
+	public Plan(Real i, Complex o, Sign s, int f, int... n) {
+		this(i, o, s, Complexity.REAL_TO_COMPLEX, f, n);
+	}
+	
+	/**
+	 * Constructs a new real-to-real plan.
+	 * 
+	 * @param i input real interleaved array
+	 * @param o output real interleaved array
+	 * @param s sign of the transform
+	 * @param f FFTW flags
+	 * @param n variable number of dimensions; defaults to `i.size()`
+	 */
+	public Plan(Real i, Real o, Sign s, int f, int... n) {
+		this(i, o, s, Complexity.REAL_TO_REAL, f, n);
+	}
+
+	private Plan(Interleave i, Interleave o, Sign s, Complexity cplx, int f, int... n) {
+		if (n == null || n.length == 0)
+			n = new int[] { i.size() };
+		interleavedInput = i;
+		interleavedOutput = o;
 		sign = s;
-		complexity = determineComplexity(i, o);
-		placement = determinePlacement(i, o);
+		complexity = cplx;
+		placement = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
 		rank = n.length;
 		dimensions = Arrays.copyOf(n, rank);
 		flags = f;
@@ -45,30 +90,17 @@ public class Plan {
 		for (int d : dimensions)
 			N *= d;
 		size = N;
-		if (input.size() == size && output.size() == size && size > 0)
-			address = create();
-		else
-			throw new IllegalArgumentException("invalid plan configuration");
-		if (address == 0)
-			throw new NullPointerException("plan creation returned null");
+		validateConfiguration(i.size(), o.size());
+		address = create();
+		validateAddress();
 	}
-
-	/**
-	 * Special constructor for use in the Guru interface.
-	 *
-	 * @param dims		array of transform dimensions
-	 * @param hmDims	array of vector dimensions
-	 * @param i			complex or real input
-	 * @param o			complex or real output
-	 * @param s			sign (ignored if the transform is C2R or R2C)
-	 * @param f			flags
-	 */
-	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
-		input = i;
-		output = o;
+	
+	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, Complexity c, int f) {
+		interleavedInput = i;
+		interleavedOutput = o;
 		sign = s;
-		complexity = determineComplexity(i, o);
-		placement = determinePlacement(i, o);
+		complexity = c;
+		placement = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
 		rank = dims.length;
 		flags = f;
 		isGuruPlan = true;
@@ -82,30 +114,17 @@ public class Plan {
 			dimensions[j] = dims[j].n;
 		}
 		size = N;
-		if (input.size() == size && output.size() == size && size > 0)
-			address = guruCreate(dims, hmDims);
-		else
-			throw new IllegalArgumentException("invalid plan configuration");
-		if (address == 0)
-			throw new NullPointerException("plan creation returned null");
+		validateConfiguration(i.size(), o.size());
+		address = guruCreate(dims, hmDims);
+		validateAddress();
 	}
 
-	/**
-	 * Special constructor for use in the Guru64 interface.
-	 *
-	 * @param dims		array of transform dimensions
-	 * @param hmDims	array of vector dimensions
-	 * @param i			complex or real input
-	 * @param o			complex or real output
-	 * @param s			sign (ignored if the transform is C2R or R2C)
-	 * @param f			flags
-	 */
-	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
-		input = i;
-		output = o;
+	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Interleave i, Interleave o, Sign s, Complexity c, int f) {
+		interleavedInput = i;
+		interleavedOutput = o;
 		sign = s;
-		complexity = determineComplexity(i, o);
-		placement = determinePlacement(i, o);
+		complexity = c;
+		placement = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
 		rank = dims.length;
 		flags = f;
 		isGuruPlan = true;
@@ -119,35 +138,23 @@ public class Plan {
 			dimensions[j] = (int) dims[j].n;
 		}
 		size = N;
-		if (input.size() == size && output.size() == size && size > 0)
-			address = guru64Create(dims, hmDims);
-		else
-			throw new IllegalArgumentException("invalid plan configuration");
-		if (address == 0)
-			throw new NullPointerException("plan creation returned null");
+		validateConfiguration(i.size(), o.size());
+		address = guru64Create(dims, hmDims);
+		validateAddress();
 	}
 
-	/**
-	 * Special constructor for use in the Guru interface.
-	 *
-	 * @param dims		array of transform dimensions
-	 * @param hmDims	array of vector dimensions
-	 * @param in		complex or real split array input
-	 * @param out		complex or real split array output
-	 * @param f			flags
-	 */
-	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split in, Split out, int f) {
-		input = null;
-		output = null;
+	protected Plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split i, Split o, Complexity c, int f) {
+		interleavedInput = null;
+		interleavedOutput = null;
 		sign = Sign.NEGATIVE;
-		complexity = determineSplitComplexity(in, out);
-		placement = in == out ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+		complexity = c;
+		placement = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
 		rank = dims.length;
 		flags = f;
 		isGuruPlan = true;
 		isSplitArrayPlan = true;
-		splitInput = in;
-		splitOutput = out;
+		splitInput = i;
+		splitOutput = o;
 		dimensions = new int[rank];
 		long N = 1;
 		for (int j = 0; j < rank; j++) {
@@ -155,33 +162,23 @@ public class Plan {
 			dimensions[j] = dims[j].n;
 		}
 		size = N;
+		validateConfiguration(i.size(), o.size());
 		address = guruSplitCreate(dims, hmDims);
-		if (address == 0)
-			throw new NullPointerException("plan creation returned null");
+		validateAddress();
 	}
 
-	/**
-	 * Special constructor for use in the Guru64 interface.
-	 *
-	 * @param dims		array of transform dimensions
-	 * @param hmDims	array of vector dimensions
-	 * @param in		complex or real split array input
-	 * @param out		complex or real split array output
-	 * @param s			sign (ignored if the transform is C2R or R2C)
-	 * @param f			flags
-	 */
-	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Split in, Split out, Sign s, int f) {
-		input = null;
-		output = null;
-		sign = s;
-		complexity = determineSplitComplexity(in, out);
-		placement = in == out ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+	protected Plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Split i, Split o, Complexity c, int f) {
+		interleavedInput = null;
+		interleavedOutput = null;
+		sign = Sign.NEGATIVE;
+		complexity = c;
+		placement = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+		splitInput = i;
+		splitOutput = o;
 		rank = dims.length;
 		flags = f;
 		isGuruPlan = true;
 		isSplitArrayPlan = true;
-		splitInput = in;
-		splitOutput = out;
 		dimensions = new int[rank];
 		long N = 1;
 		for (int j = 0; j < rank; j++) {
@@ -189,183 +186,102 @@ public class Plan {
 			dimensions[j] = (int) dims[j].n;
 		}
 		size = N;
+		validateConfiguration(i.size(), o.size());
 		address = guru64SplitCreate(dims, hmDims);
-		if (address == 0)
-			throw new NullPointerException("plan creation returned null");
+		validateAddress();
 	}
 
-	/**
-	 * Determines the C2C, C2R, R2C, or R2R complexity of two split arrays.
-	 *
-	 * @param i	input
-	 * @param o	output
-	 * @return	the complexity of the input and output plans
-	 */
-	private static Complexity determineSplitComplexity(Split i, Split o) {
-		if (i.im != null) {
-			if (o.im != null) {
-				return Complexity.COMPLEX_TO_COMPLEX;
-			} else {
-				return Complexity.COMPLEX_TO_REAL;
-			}
-		} else {
-			if (o.im != null) {
-				return Complexity.REAL_TO_COMPLEX;
-			}
-		}
-		return Complexity.REAL_TO_REAL;
-	}
-
-	/**
-	 * Determines the placement of two interleaved arrays.
-	 *
-	 * @param input		input
-	 * @param output	output
-	 * @return			the placement of the two arrays
-	 */
-	private static Placement determinePlacement(Interleave input, Interleave output) {
-		if (input == output) // intentionally compare the address of these Values
-			return Placement.IN_PLACE;
-		return Placement.OUT_OF_PLACE;
-	}
-
-	/**
-	 * Determines the complexity of two interleaved arrays.
-	 * @param input		input
-	 * @param output	output
-	 * @return			the complexity of the two arrays
-	 */
-	private static Complexity determineComplexity(Interleave input, Interleave output) {
-		if (input instanceof Complex) {
-			if (output instanceof Complex) {
-				return Complexity.COMPLEX_TO_COMPLEX;
-			} else { 
-				return Complexity.COMPLEX_TO_REAL;
-			}
-		} else if (output instanceof Complex) {
-			return Complexity.REAL_TO_COMPLEX;
-		}
-		return Complexity.REAL_TO_REAL;
-	}
-
-	/**
-	 * Validates a new array execute function before any native code is run.
-	 *
-	 * @param t	type
-	 * @param i	interleaved input
-	 * @param o	interleaved output
-	 */
-	private void validate(Complexity t, Interleave i, Interleave o) {
+	private void validateNewArrays(Complexity requestedComplexity, Placement requestedPlacement, int inputSize, int outputSize, boolean isSplit) { 
 		if (destroyed)
 			throw new NullPointerException("attempted to execute destroyed plan");
-		int in = i.size(), out = o.size();
-		if (complexity != t)
-			throw new IllegalArgumentException("requested " + t + " transform for " + complexity + " plan");
-		if (in != out)
+		if (complexity != requestedComplexity)
+			throw new IllegalArgumentException("requested " + requestedComplexity + " transform for " + complexity + " plan");
+		if (inputSize != outputSize)
 			throw new IllegalArgumentException("input arrays not equal size");
-		if (size != in)
-			throw new IllegalArgumentException("requested " + in + " size transform for " + size + " size plan");
-		if (i == o) {
-			if (placement == Placement.OUT_OF_PLACE) {
-				throw new IllegalArgumentException("requested in-place transform for out-of-place plan");
-			}
-		} else if (placement == Placement.IN_PLACE) {
-			throw new IllegalArgumentException("requested out-of-place transform for in-place plan");
-		}
+		if (size != inputSize)
+			throw new IllegalArgumentException("requested " + inputSize + " size transform for " + size + " size plan");
+		if (requestedPlacement != placement)
+			throw new IllegalArgumentException("requested " + requestedPlacement + " transform for " + placement + " plan");
+		if (isSplitArrayPlan != isSplit)
+			throw new IllegalArgumentException("incorrect array input type");
+	}
+	
+	private void validateConfiguration(int iSize, int oSize) {
+		if (iSize != oSize || iSize != size || size <= 0)
+			throw new IllegalArgumentException("invalid plan configuration");
+	}
+	
+	private void validateAddress() {
+		if (address == 0)
+			throw new IllegalArgumentException("plan creation returned null");
 	}
 
-	/**
-	 * Creates a new fftw_plan and returns its address.
-	 *
-	 * @return	the address of a newly created fftw_plan
-	 */
 	private long create() {
 		switch (complexity) {
 		case COMPLEX_TO_COMPLEX:
 			switch (rank) {
 			case 1:
-				return jfftw_plan_dft_1d(dimensions[0], (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_dft_1d(dimensions[0], (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			case 2:
-				return jfftw_plan_dft_2d(dimensions[0], dimensions[1], (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_dft_2d(dimensions[0], dimensions[1], (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			case 3:
-				return jfftw_plan_dft_3d(dimensions[0], dimensions[1], dimensions[2], (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_dft_3d(dimensions[0], dimensions[1], dimensions[2], (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			default:
-				return jfftw_plan_dft(rank, dimensions, (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_dft(rank, dimensions, (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			}
 		case COMPLEX_TO_REAL:
 			switch (rank) {
 			case 1:
-				return jfftw_plan_dft_c2r_1d(dimensions[0], (Complex) input, (Real) output, flags);
+				return jfftw_plan_dft_c2r_1d(dimensions[0], (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			case 2:
-				return jfftw_plan_dft_c2r_2d(dimensions[0], dimensions[1], (Complex) input, (Real) output, flags);
+				return jfftw_plan_dft_c2r_2d(dimensions[0], dimensions[1], (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			case 3:
-				return jfftw_plan_dft_c2r_3d(dimensions[0], dimensions[1], dimensions[2], (Complex) input, (Real) output, flags);
+				return jfftw_plan_dft_c2r_3d(dimensions[0], dimensions[1], dimensions[2], (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			default:
-				return jfftw_plan_dft_c2r(rank, dimensions, (Complex) input, (Real) output, flags);
+				return jfftw_plan_dft_c2r(rank, dimensions, (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			}
 		case REAL_TO_COMPLEX:
 			switch (rank) {
 			case 1:
-				return jfftw_plan_dft_r2c_1d(dimensions[0], (Real) input, (Complex) output, flags);
+				return jfftw_plan_dft_r2c_1d(dimensions[0], (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			case 2:
-				return jfftw_plan_dft_r2c_2d(dimensions[0], dimensions[1], (Real) input, (Complex) output, flags);
+				return jfftw_plan_dft_r2c_2d(dimensions[0], dimensions[1], (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			case 3:
-				return jfftw_plan_dft_r2c_3d(dimensions[0], dimensions[1], dimensions[2], (Real) input, (Complex) output, flags);
+				return jfftw_plan_dft_r2c_3d(dimensions[0], dimensions[1], dimensions[2], (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			default:
-				return jfftw_plan_dft_r2c(rank, dimensions, (Real) input, (Complex) output, flags);
+				return jfftw_plan_dft_r2c(rank, dimensions, (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			}
 		default:
 			throw new UnsupportedOperationException(complexity + " transform not supported");
 		}
 	}
 
-	/**
-	 * Creates and returns a newly created fftw_plan using the Guru interface.
-	 *
-	 * @param dims   	transform dimensions
-	 * @param hmDims	vector dimensions
-	 * @return			address of a new fftw_plan
-	 */
 	private long guruCreate(Guru.Dimension[] dims, Guru.Dimension[] hmDims) {
 		switch(complexity) {
 			case COMPLEX_TO_COMPLEX:
-				return jfftw_plan_guru_dft(rank, dims, hmDims.length, hmDims, (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_guru_dft(rank, dims, hmDims.length, hmDims, (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			case COMPLEX_TO_REAL:
-				return jfftw_plan_guru_dft_c2r(rank, dims, hmDims.length, hmDims, (Complex) input, (Real) output, flags);
+				return jfftw_plan_guru_dft_c2r(rank, dims, hmDims.length, hmDims, (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			case REAL_TO_COMPLEX:
-				return jfftw_plan_guru_dft_r2c(rank, dims, hmDims.length, hmDims, (Real) input, (Complex) output, flags);
+				return jfftw_plan_guru_dft_r2c(rank, dims, hmDims.length, hmDims, (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			default:
 				throw new UnsupportedOperationException(complexity + " transform not supported");
 		}
 	}
 
-	/**
-	 * Creates and returns a newly created fftw_plan using the Guru64 interface.
-	 *
-	 * @param dims   	transform dimensions
-	 * @param hmDims	vector dimensions
-	 * @return			address of a new fftw_plan
-	 */
 	private long guru64Create(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims) {
 		switch (complexity) {
 			case COMPLEX_TO_COMPLEX:
-				return jfftw_plan_guru64_dft(rank, dims, hmDims.length, hmDims, (Complex) input, (Complex) output, sign.value, flags);
+				return jfftw_plan_guru64_dft(rank, dims, hmDims.length, hmDims, (Complex) interleavedInput, (Complex) interleavedOutput, sign.value, flags);
 			case COMPLEX_TO_REAL:
-				return jfftw_plan_guru64_dft_c2r(rank, dims, hmDims.length, hmDims, (Complex) input, (Real) output, flags);
+				return jfftw_plan_guru64_dft_c2r(rank, dims, hmDims.length, hmDims, (Complex) interleavedInput, (Real) interleavedOutput, flags);
 			case REAL_TO_COMPLEX:
-				return jfftw_plan_guru64_dft_r2c(rank, dims, hmDims.length, hmDims, (Real) input, (Complex) output, flags);
+				return jfftw_plan_guru64_dft_r2c(rank, dims, hmDims.length, hmDims, (Real) interleavedInput, (Complex) interleavedOutput, flags);
 			default:
 				throw new UnsupportedOperationException(complexity + " transform not supported");
 		}
 	}
 
-	/**
-	 * Creates and returns a newly created fftw_plan using the Guru interface and split arrays.
-	 *
-	 * @param dims   	transform dimensions
-	 * @param hmDims	vector dimensions
-	 * @return			address of a new fftw_plan
-	 */
 	private long guruSplitCreate(Guru.Dimension[] dims, Guru.Dimension[] hmDims) {
 		switch (complexity) {
 			case COMPLEX_TO_COMPLEX:
@@ -379,17 +295,10 @@ public class Plan {
 		}
 	}
 
-	/**
-	 * Creates and returns a newly created fftw_plan using the Guru64 interface and split arrays.
-	 *
-	 * @param dims   	transform dimensions
-	 * @param hmDims	vector dimensions
-	 * @return			address of a new fftw_plan
-	 */
 	private long guru64SplitCreate(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims) {
 		switch (complexity) {
 			case COMPLEX_TO_COMPLEX:
-				return jfftw_plan_guru64_dft_split(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, splitInput.im, sign.value, flags);
+				return jfftw_plan_guru64_dft_split(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, splitOutput.im, sign.value, flags);
 			case COMPLEX_TO_REAL:
 				return jfftw_plan_guru64_dft_split_c2r(rank, dims, hmDims.length, hmDims, splitInput.re, splitInput.im, splitOutput.re, flags);
 			case REAL_TO_COMPLEX:
@@ -405,10 +314,15 @@ public class Plan {
 	 * @param f file to print plan
 	 */
 	public void fprint(File f) {
-		if (!destroyed)
-			jfftw_fprint_plan(this, f.getAbsolutePath());
-		else
-			throw new NullPointerException("plan is destroyed");
+		if (f.canWrite()) {
+			if (!destroyed) {
+				jfftw_fprint_plan(this, f.getAbsolutePath());
+			} else {
+				throw new NullPointerException("plan is destroyed");
+			}
+		} else {
+			throw new SecurityException("cannot write to file: " + f);
+		}
 	}
 
 	/**
@@ -442,9 +356,9 @@ public class Plan {
 		if (!destroyed) {
 			jfftw_destroy_plan(this);
 			destroyed = true;
-		}
-		else
+		} else {
 			throw new NullPointerException("plan is destroyed");
+		}
 	}
 
 	/**
@@ -476,7 +390,8 @@ public class Plan {
 	 * @param o new complex output array
 	 */
 	public void execute(Complex i, Complex o) {
-		validate(Complexity.COMPLEX_TO_COMPLEX, i, o);
+		Placement p = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+		validateNewArrays(Complexity.COMPLEX_TO_COMPLEX, p, i.size(), o.size(), false);
 		jfftw_execute_dft(this, i, o);
 	}
 
@@ -487,7 +402,7 @@ public class Plan {
 	 * @param o new real output array
 	 */
 	public void execute(Complex i, Real o) {
-		validate(Complexity.COMPLEX_TO_REAL, i, o);
+		validateNewArrays(Complexity.COMPLEX_TO_REAL, Placement.OUT_OF_PLACE, i.size(), o.size(), false);
 		jfftw_execute_dft_c2r(this, i, o);
 	}
 
@@ -498,7 +413,7 @@ public class Plan {
 	 * @param o new complex output array
 	 */
 	public void execute(Real i, Complex o) {
-		validate(Complexity.REAL_TO_COMPLEX, i, o);
+		validateNewArrays(Complexity.REAL_TO_COMPLEX, Placement.OUT_OF_PLACE, i.size(), o.size(), false);
 		jfftw_execute_dft_r2c(this, i, o);
 	}
 
@@ -509,42 +424,43 @@ public class Plan {
 	 * @param o new real output array
 	 */
 	public void execute(Real i, Real o) {
-		validate(Complexity.REAL_TO_REAL, i, o);
+		Placement p = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+		validateNewArrays(Complexity.REAL_TO_REAL, p, i.size(), o.size(), false);
 		jfftw_execute_r2r(this, i, o);
 	}
-
+	
 	/**
-	 * Executes this split array plan using new split arrays.
-	 *
-	 * @param i	new split array input
-	 * @param o	new split array output
+	 * Executes this COMPLEX_TO_COMPLEX split array plan using new arrays.
+	 * 
+	 * @param i	new complex split array input
+	 * @param o new complex split array output
 	 */
 	public void execute(Split i, Split o) {
-		if (!destroyed) {
-			if (isGuruPlan && isSplitArrayPlan) {
-				switch (complexity) {
-					case COMPLEX_TO_COMPLEX:
-						if (i.im == null || o.im == null)
-							throw new IllegalArgumentException("plan requires " + complexity + " inputs");
-						jfftw_execute_split_dft(this, i.re, i.im, o.re, o.im);
-						break;
-					case COMPLEX_TO_REAL:
-						if (i.im == null)
-							throw new IllegalArgumentException("plan requires " + complexity + " inputs");
-						jfftw_execute_split_dft_c2r(this, i.re, i.im, o.re);
-						break;
-					case REAL_TO_COMPLEX:
-						if (o.im == null)
-							throw new IllegalArgumentException("plan requires " + complexity + " inputs");
-						jfftw_execute_split_dft_r2c(this, i.re, o.re, o.im);
-						break;
-					default:
-						throw new UnsupportedOperationException(complexity + " transform not supported");
-				}
-			} else
-				throw new UnsupportedOperationException("plan not made for split arrays");
-		} else
-			throw new NullPointerException("plan is destroyed");
+		Placement p = i == o ? Placement.IN_PLACE : Placement.OUT_OF_PLACE;
+		validateNewArrays(Complexity.COMPLEX_TO_COMPLEX, p, i.size(), o.size(), true);
+		jfftw_execute_split_dft(this, i.re, i.im, o.re, o.im);
+	}
+	
+	/**
+	 * Executes this COMPLEX_TO_REAL split array plan using new arrays.
+	 * 
+	 * @param i	new complex split array input
+	 * @param o	new real array output
+	 */
+	public void execute(Split i, Real o) {
+		validateNewArrays(Complexity.COMPLEX_TO_REAL, Placement.OUT_OF_PLACE, i.size(), o.size(), true);
+		jfftw_execute_split_dft_c2r(this, i.re, i.im, o.buff);
+	}
+	
+	/**
+	 * Executes this REAL_TO_COMPLEX split array plan using new arrays.
+	 * 
+	 * @param i	new real array input
+	 * @param o	new complex split array output
+	 */
+	public void execute(Real i, Split o) {
+		validateNewArrays(Complexity.REAL_TO_COMPLEX, Placement.OUT_OF_PLACE, i.size(), o.size(), true);
+		jfftw_execute_split_dft_r2c(this, i.buff, o.re, o.im);
 	}
 	
 	/**
@@ -573,9 +489,9 @@ public class Plan {
 	 */
 	public final Complex getComplexInput() {
 		if (isSplitArrayPlan)
-			throw new UnsupportedOperationException("plan not made for split arrays");
-		if (input instanceof Complex)
-			return (Complex) input;
+			throw new UnsupportedOperationException("plan not made for split array inputs");
+		if (interleavedInput instanceof Complex)
+			return (Complex) interleavedInput;
 		else
 			throw new ClassCastException("input is not complex");
 	}
@@ -584,10 +500,15 @@ public class Plan {
 	 * @return the real input of this plan
 	 */
 	public final Real getRealInput() {
-		if (isSplitArrayPlan)
-			throw new UnsupportedOperationException("plan not made for split arrays");
-		if (input instanceof Real)
-			return (Real) input;
+		if (isSplitArrayPlan) {
+			if (complexity != Complexity.REAL_TO_COMPLEX || complexity != Complexity.REAL_TO_REAL) {
+				throw new UnsupportedOperationException("plan not made for real-only inputs");
+			} else {
+				return new Real(splitInput.re);
+			}
+		}
+		if (interleavedInput instanceof Real)
+			return (Real) interleavedInput;
 		else
 			throw new ClassCastException("input is not real");
 	}
@@ -597,9 +518,9 @@ public class Plan {
 	 */
 	public final Complex getComplexOutput() {
 		if (isSplitArrayPlan)
-			throw new UnsupportedOperationException("plan not made for split arrays");
-		if (output instanceof Complex)
-			return (Complex) output;
+			throw new UnsupportedOperationException("plan not made for split array outputs");
+		if (interleavedOutput instanceof Complex)
+			return (Complex) interleavedOutput;
 		else
 			throw new ClassCastException("output is not complex");
 	}
@@ -608,10 +529,15 @@ public class Plan {
 	 * @return the real output of this plan
 	 */
 	public final Real getRealOutput() {
-		if (isSplitArrayPlan)
-			throw new UnsupportedOperationException("plan not made for split arrays");
-		if (output instanceof Real)
-			return (Real) output;
+		if (isSplitArrayPlan) {
+			if (complexity != Complexity.COMPLEX_TO_REAL || complexity != Complexity.REAL_TO_REAL) {
+				throw new UnsupportedOperationException("plan not made for real-only outputs");
+			} else {
+				return new Real(splitOutput.re);
+			}
+		}
+		if (interleavedOutput instanceof Real)
+			return (Real) interleavedOutput;
 		else
 			throw new ClassCastException("output is not real");
 	}
@@ -645,23 +571,31 @@ public class Plan {
 	}
 
 	/**
-	 * @return	split input arrays, null if this plan is not a split array plan
+	 * @return	split input arrays, throws an UnsupportedOperationException if this plan is not a split array plan
 	 */
 	public final Split getSplitInput() {
-		if (isSplitArrayPlan)
-			return splitInput;
-		else
-			throw new UnsupportedOperationException("plan not made with split arrays");
+		if (isSplitArrayPlan) {
+			if (complexity == Complexity.COMPLEX_TO_COMPLEX || complexity == Complexity.COMPLEX_TO_REAL) {
+				return splitInput;
+			}
+			throw new UnsupportedOperationException("plan not made for complex split array inputs");
+		} else {
+			throw new UnsupportedOperationException("plan not made for split arrays");
+		}
 	}
 
 	/**
-	 * @return	split output arrays, null if this plan is not a split array plan
+	 * @return	split output arrays, throws an UnsupportedOperationException if this plan is not a split array plan
 	 */
 	public final Split getSplitOutput() {
-		if (isSplitArrayPlan)
-			return splitOutput;
-		else
-			throw new UnsupportedOperationException("plan not made with split arrays");
+		if (isSplitArrayPlan) {
+			if (complexity == Complexity.COMPLEX_TO_COMPLEX || complexity == Complexity.REAL_TO_COMPLEX) {
+				return splitOutput;
+			}
+			throw new UnsupportedOperationException("plan not made for complex split array outputs");
+		} else {
+			throw new UnsupportedOperationException("plan not made for split arrays");
+		}
 	}
 
 	/**
@@ -678,7 +612,7 @@ public class Plan {
 		if (!destroyed)
 			return jfftw_sprint_plan(this);
 		else
-			throw new NullPointerException("plan ");
+			return "destroyed plan";
 	}
 	
 	/**

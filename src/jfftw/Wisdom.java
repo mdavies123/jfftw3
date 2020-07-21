@@ -26,9 +26,10 @@ public class Wisdom {
      * Exports wisdom to the file represented by s.
      * 
      * @param s		absolute name of the file to store wisdom
+     * @return		true if wisdom export is successful, false otherwise
      */
-    public static void exportToFilename(String s) {
-        jfftw_export_wisdom_to_filename(s);
+    public static boolean exportToFilename(String s) {
+        return jfftw_export_wisdom_to_filename(s);
     }
 
     /**
@@ -42,34 +43,39 @@ public class Wisdom {
 
     /**
      * Imports wisdom from a system location.
+     * 
+     * @return		true if wisdom import is successful, false otherwise
      */
-    public static void importSystemWisdom() {
-        jfftw_import_system_wisdom();
+    public static boolean importSystemWisdom() {
+        return jfftw_import_system_wisdom();
     }
 
     /**
      * Imports wisdom from a file pointed to by f.
      * 
      * @param f		file to import wisdom from
+     * @return		true if wisdom import is successful, false otherwise
      */
-    public static void importFromFile(File f) {
-        jfftw_import_wisdom_from_file(f);
+    public static boolean  importFromFile(File f) {
+    	return jfftw_import_wisdom_from_file(f);
     }
 
     /**
      * Imports wisdom from a file represented by s.
      * 
      * @param s		absolute path of a file to import wisdom from
+     * @return		true if wisdom import is successful, false otherwise
      */
-    public static void importFromFilename(String s) {
-        jfftw_import_wisdom_from_filename(s);
+    public static boolean importFromFilename(String s) {
+        return jfftw_import_wisdom_from_filename(s);
     }
 
     /**
      * Imports wisdom from a String.
      * @param s		wisdom string
+     * @return		true if wisdom import is successful, false otherwise
      */
-    public static void importFromString(String s) {
-        jfftw_import_wisdom_from_string(s);
+    public static boolean importFromString(String s) {
+        return jfftw_import_wisdom_from_string(s);
     }
 }

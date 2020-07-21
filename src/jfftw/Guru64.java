@@ -1,5 +1,7 @@
 package jfftw;
 
+import jfftw.Plan.Complexity;
+
 public class Guru64 {
 
     /**
@@ -22,32 +24,107 @@ public class Guru64 {
     }
 
     /**
-     * Creates a new Plan using the Guru64 interface.
+     * Creates a new complex-to-complex Plan using the Guru64 interface.
      *
      * @param dims		array of transform dimensions
      * @param hmDims	array of vector dimensions
-     * @param i			complex or real input
-     * @param o			complex or real output
+     * @param i			complex interleaved input
+     * @param o			complex interleaved output
      * @param s			sign (ignored if the transform is C2R or R2C)
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Interleave i, Interleave o, Sign s, int f) {
-        return new Plan(dims, hmDims, i, o, s, f);
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Complex i, Complex o, Sign s, int f) {
+        return new Plan(dims, hmDims, i, o, s, Complexity.COMPLEX_TO_COMPLEX, f);
     }
-
+    
     /**
-     * Creates a new Plan using the Guru64 interface and split arrays.
+     * Creates a new complex-to-real Plan using the Guru64 interface.
      *
      * @param dims		array of transform dimensions
      * @param hmDims	array of vector dimensions
-     * @param i	    	complex or real split array input
-     * @param o 		complex or real split array output
+     * @param i			complex interleaved input
+     * @param o			real interleaved output
+     * @param s			sign (ignored if the transform is C2R or R2C)
      * @param f			flags
      * @return          a new Plan
      */
-    public static Plan plan(Guru.Dimension[] dims, Guru.Dimension[] hmDims, Split i, Split o, int f) {
-        return new Plan(dims, hmDims, i, o, f);
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Complex i, Real o, Sign s, int f) {
+        return new Plan(dims, hmDims, i, o, s, Complexity.COMPLEX_TO_COMPLEX, f);
+    }
+    
+    /**
+     * Creates a new real-to-complex Plan using the Guru64 interface.
+     *
+     * @param dims		array of transform dimensions
+     * @param hmDims	array of vector dimensions
+     * @param i			real interleaved input
+     * @param o			complex interleaved output
+     * @param s			sign (ignored if the transform is C2R or R2C)
+     * @param f			flags
+     * @return          a new Plan
+     */
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Real i, Complex o, Sign s, int f) {
+        return new Plan(dims, hmDims, i, o, s, Complexity.COMPLEX_TO_COMPLEX, f);
+    }
+    
+    /**
+     * Creates a new real-to-real Plan using the Guru64 interface.
+     *
+     * @param dims		array of transform dimensions
+     * @param hmDims	array of vector dimensions
+     * @param i			real interleaved input
+     * @param o			real interleaved output
+     * @param s			sign (ignored if the transform is C2R or R2C)
+     * @param f			flags
+     * @return          a new Plan
+     */
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Real i, Real o, Sign s, int f) {
+        return new Plan(dims, hmDims, i, o, s, Complexity.COMPLEX_TO_COMPLEX, f);
+    }
+
+    /**
+     * Creates a new complex-to-complex Plan using the Guru64 interface and split arrays.
+     *
+     * @param dims		array of transform dimensions
+     * @param hmDims	array of vector dimensions
+     * @param i	    	complex split array input
+     * @param o 		complex split array output
+     * @param f			flags
+     * @return          a new Plan
+     */
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Split i, Split o, int f) {
+        return new Plan(dims, hmDims, i, o, Complexity.COMPLEX_TO_COMPLEX, f);
+    }
+    
+    /**
+     * Creates a new complex-to-real Plan using the Guru64 interface and split arrays.
+     *
+     * @param dims		array of transform dimensions
+     * @param hmDims	array of vector dimensions
+     * @param i	    	complex split array input
+     * @param o 		real array output
+     * @param f			flags
+     * @return          a new Plan
+     */
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Split i, Real o, int f) {
+    	Split ro = new Split(o.buff, null);
+        return new Plan(dims, hmDims, i, ro, Complexity.COMPLEX_TO_REAL, f);
+    }
+    
+    /**
+     * Creates a new real-to-complex Plan using the Guru64 interface and split arrays.
+     *
+     * @param dims		array of transform dimensions
+     * @param hmDims	array of vector dimensions
+     * @param i	    	real array input
+     * @param o 		complex split array output
+     * @param f			flags
+     * @return          a new Plan
+     */
+    public static Plan plan(Guru64.Dimension[] dims, Guru64.Dimension[] hmDims, Real i, Split o, int f) {
+    	Split ri = new Split(i.buff, null);
+        return new Plan(dims, hmDims, ri, o, Complexity.COMPLEX_TO_COMPLEX, f);
     }
 
     /**
