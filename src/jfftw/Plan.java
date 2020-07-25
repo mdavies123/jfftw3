@@ -203,10 +203,10 @@ public class Plan {
     }
 
     /**
-     * Executes this COMPLEX_TO_COMPLEX plan using new arrays.
+     * Executes this plan using new arrays.
      *
-     * @param i new complex input array
-     * @param o new complex output array
+     * @param i new input array
+     * @param o new output array
      */
     public void execute(DoubleBuffer i, DoubleBuffer o) {
 
@@ -322,7 +322,7 @@ public class Plan {
     }
 
     /**
-     * @return returns true if this plan was constructed without the FFTW_UNALIGNED flag
+     * @return returns true if this plan was constructed without Flag.UNALIGNED
      */
     public boolean requiresAligned() {
         return requiresAligned;
