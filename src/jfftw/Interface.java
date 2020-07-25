@@ -6,13 +6,13 @@ import java.nio.DoubleBuffer;
 
 public class Interface {
 
-    protected static boolean isLoaded = false;
+    protected static boolean libsLoaded = false, threadsLoaded = false;
 
-    protected static synchronized native int jfftw_alignment_of(Interleave v);
+    protected static synchronized native ByteBuffer jfftw_alloc_real(long N);
 
-    protected static synchronized native ByteBuffer jfftw_allocate_complex_buffer(long n);
+    protected static synchronized native ByteBuffer jfftw_alloc_complex(long N);
 
-    protected static synchronized native ByteBuffer jfftw_allocate_real_buffer(long n);
+    protected static synchronized native int jfftw_alignment_of(DoubleBuffer v);
 
     protected static synchronized native void jfftw_cleanup();
 
@@ -26,19 +26,13 @@ public class Interface {
 
     protected static native void jfftw_execute(Plan p);
 
-    protected static native void jfftw_execute_dft(Plan p, Complex ci, Complex co);
+    protected static native void jfftw_execute_dft(Plan p, DoubleBuffer ci, DoubleBuffer co);
 
-    protected static native void jfftw_execute_dft_c2r(Plan p, Complex ci, Real ro);
+    protected static native void jfftw_execute_dft_c2r(Plan p, DoubleBuffer ci, DoubleBuffer ro);
 
-    protected static native void jfftw_execute_dft_r2c(Plan p, Real ri, Complex co);
+    protected static native void jfftw_execute_dft_r2c(Plan p, DoubleBuffer ri, DoubleBuffer co);
 
-    protected static native void jfftw_execute_split_dft(Plan p, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io);
-
-    protected static native void jfftw_execute_split_dft_c2r(Plan p, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro);
-
-    protected static native void jfftw_execute_split_dft_r2c(Plan p, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io);
-
-    protected static native void jfftw_execute_r2r(Plan p, Real ri, Real ro);
+    protected static native void jfftw_execute_r2r(Plan p, DoubleBuffer ri, DoubleBuffer ro);
 
     protected static synchronized native void jfftw_export_wisdom_to_file(File f);
 
@@ -72,53 +66,61 @@ public class Interface {
 
     protected static synchronized native String jfftw_sprint_plan(Plan p);
 
-    protected static synchronized native long jfftw_plan_dft(int rank, int[] n, Complex in, Complex out, int sign, int flags);
+    protected static synchronized native long jfftw_plan_dft(int rank, int[] n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_1d(int n, Complex in, Complex out, int sign, int flags);
+    protected static synchronized native long jfftw_plan_dft_1d(int n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_2d(int n0, int n1, Complex in, Complex out, int sign, int flags);
+    protected static synchronized native long jfftw_plan_dft_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, Complex in, Complex out, int sign, int flags);
+    protected static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, Complex in, Real out, int flags);
+    protected static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, DoubleBuffer ci, DoubleBuffer ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_1d(int n, Complex in, Real out, int flags);
+    protected static synchronized native long jfftw_plan_dft_c2r_1d(int n, DoubleBuffer ci, DoubleBuffer ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, Complex in, Real out, int flags);
+    protected static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, Complex in, Real out, int flags);
+    protected static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, Real in, Complex out, int flags);
+    protected static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, DoubleBuffer ri, DoubleBuffer co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_1d(int n, Real in, Complex out, int flags);
+    protected static synchronized native long jfftw_plan_dft_r2c_1d(int n, DoubleBuffer ri, DoubleBuffer co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, Real in, Complex out, int flags);
+    protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, DoubleBuffer ri, DoubleBuffer co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, Real in, Complex out, int flags);
+    protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, DoubleBuffer ri, DoubleBuffer co, int flags);
 
-    protected static synchronized native long jfftw_plan_guru_dft(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Complex in, Complex out, int sign, int flags);
+    /**
+     * Used to determine the alignment of a DoubleBuffer.
+     *
+     * @param arr DoubleBuffer to check the alignment of
+     * @return alignment
+     */
+    public static int alignmentOf(DoubleBuffer arr) {
+        if (!arr.isDirect())
+            throw new IllegalArgumentException("input buffer is not direct");
+        return jfftw_alignment_of(arr);
+    }
 
-    protected static synchronized native long jfftw_plan_guru_dft_c2r(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Complex in, Real out, int flags);
+    /**
+     * Allocates a complex buffer of size N*2 using fftw_alloc_complex.
+     *
+     * @param N buffer size
+     * @return new direct DoubleBuffer
+     */
+    public static DoubleBuffer allocateComplex(long N) {
+        return jfftw_alloc_complex(N).asDoubleBuffer();
+    }
 
-    protected static synchronized native long jfftw_plan_guru_dft_r2c(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, Real in, Complex out, int flags);
-
-    protected static synchronized native long jfftw_plan_guru_dft_split(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int flags);
-
-    protected static synchronized native long jfftw_plan_guru_dft_split_c2r(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, int flags);
-
-    protected static synchronized native long jfftw_plan_guru_dft_split_r2c(int rank, Guru.Dimension[] dims, int howmany_rank, Guru.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, Complex in, Complex out, int sign, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft_c2r(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, Complex in, Real out, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft_r2c(int rank, Guru64.Dimension[] ims, int howmany_rank, Guru64.Dimension[] howmany_dims, Real in, Complex out, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft_split(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, DoubleBuffer io, int sign, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft_split_c2r(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ii, DoubleBuffer ro, int flags);
-
-    protected static synchronized native long jfftw_plan_guru64_dft_split_r2c(int rank, Guru64.Dimension[] dims, int howmany_rank, Guru64.Dimension[] howmany_dims, DoubleBuffer ri, DoubleBuffer ro, DoubleBuffer io, int flags);
+    /**
+     * Allocated a real buffer of size N using fftw_alloc_real
+     *
+     * @param N buffer size
+     * @return new direct DoubleBuffer
+     */
+    public static DoubleBuffer allocateReal(long N) {
+        return jfftw_alloc_real(N).asDoubleBuffer();
+    }
 
     /**
      * Cleans up FFTW internal state as if the program just began.
@@ -137,20 +139,23 @@ public class Interface {
     }
 
     /**
-     * This function, which need only be called once, performs any one-time 
+     * This function, which need only be called once, performs any one-time
      * initialization required to use threads on your system.
      * <p>
      * You may also specify the name of the FFTW native library (if any) which handles
      * threads. If your FFTW threads library is built in to the main FFTW library,
      * you may pass `null` in for this argument.
-     * 
-     * @param lib	name of the FFTW native library responsible for threads
-     * @return		true if threads loaded successfully, false otherwise
+     *
+     * @param lib name of the FFTW native library responsible for threads
+     * @return true if threads loaded successfully, false otherwise
      */
     public static boolean initThreads(String lib) {
-		if (lib != null)
-			System.loadLibrary(lib);
-        return jfftw_init_threads();
+        if (!threadsLoaded) {
+            if (lib != null)
+                System.loadLibrary(lib);
+            threadsLoaded = jfftw_init_threads();
+        }
+        return threadsLoaded;
     }
 
     /**
@@ -165,8 +170,8 @@ public class Interface {
 
     /**
      * Specifies a number of threads to use in planning.
-     * 
-     * @param nthreads	number of threads
+     *
+     * @param nthreads number of threads
      */
     public static void planWithNThreads(int nthreads) {
         jfftw_plan_with_nthreads(nthreads);
@@ -174,27 +179,27 @@ public class Interface {
 
     /**
      * Sets a rough timelimit for planning.
-     * 
-     * @param t	time in seconds
+     *
+     * @param t time in seconds
      */
     public static void setTimelimit(double t) {
         jfftw_set_timelimit(t);
     }
-	
+
     /**
      * Loads the native FFTW and JFFTW libraries.
      * <p>
      * These native libraries must be in the JVM's java.library.path directory.
-     * 
-     * @param fftw		name of the FFTW library
-     * @param jfftw		name of the JFFTW library
+     *
+     * @param fftw  name of the FFTW library
+     * @param jfftw name of the JFFTW library
      */
-	public static void loadLibraries(String fftw, String jfftw) {
-		if (!isLoaded) {
-			System.loadLibrary(fftw);
-			System.loadLibrary(jfftw);
-			isLoaded = true;
-		}
-	}
+    public static void loadLibraries(String fftw, String jfftw) {
+        if (!libsLoaded) {
+            System.loadLibrary(fftw);
+            System.loadLibrary(jfftw);
+            libsLoaded = true;
+        }
+    }
 
 }

@@ -9,27 +9,27 @@ extern "C" {
 #endif
 /*
  * Class:     jfftw_Interface
+ * Method:    jfftw_alloc_real
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1alloc_1real
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     jfftw_Interface
+ * Method:    jfftw_alloc_complex
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1alloc_1complex
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     jfftw_Interface
  * Method:    jfftw_alignment_of
- * Signature: (Ljfftw/Value;)I
+ * Signature: (Ljava/nio/DoubleBuffer;)I
  */
 JNIEXPORT jint JNICALL Java_jfftw_Interface_jfftw_1alignment_1of
   (JNIEnv *, jclass, jobject);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_allocate_complex_buffer
- * Signature: (J)Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1allocate_1complex_1buffer
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_allocate_real_buffer
- * Signature: (J)Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1allocate_1real_1buffer
-  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     jfftw_Interface
@@ -82,7 +82,7 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft
- * Signature: (Ljfftw/Plan;Ljfftw/Complex;Ljfftw/Complex;)V
+ * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft
   (JNIEnv *, jclass, jobject, jobject, jobject);
@@ -90,7 +90,7 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft_c2r
- * Signature: (Ljfftw/Plan;Ljfftw/Complex;Ljfftw/Real;)V
+ * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1c2r
   (JNIEnv *, jclass, jobject, jobject, jobject);
@@ -98,7 +98,7 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1c2r
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft_r2c
- * Signature: (Ljfftw/Plan;Ljfftw/Real;Ljfftw/Complex;)V
+ * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1r2c
   (JNIEnv *, jclass, jobject, jobject, jobject);
@@ -106,34 +106,10 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1r2c
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_r2r
- * Signature: (Ljfftw/Plan;Ljfftw/Real;Ljfftw/Real;)V
+ * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1r2r
   (JNIEnv *, jclass, jobject, jobject, jobject);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_execute_split_dft
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1split_1dft
-  (JNIEnv *, jclass, jobject, jobject, jobject, jobject, jobject);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_execute_split_dft_c2r
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1split_1dft_1c2r
-  (JNIEnv *, jclass, jobject, jobject, jobject, jobject);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_execute_split_dft_r2c
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1split_1dft_1r2c
-  (JNIEnv *, jclass, jobject, jobject, jobject, jobject);
 
 /*
  * Class:     jfftw_Interface
@@ -266,7 +242,7 @@ JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1sprint_1plan
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft
- * Signature: (I[ILjfftw/Complex;Ljfftw/Complex;II)J
+ * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft
   (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint, jint);
@@ -274,7 +250,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_1d
- * Signature: (ILjfftw/Complex;Ljfftw/Complex;II)J
+ * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_11d
   (JNIEnv *, jclass, jint, jobject, jobject, jint, jint);
@@ -282,7 +258,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_11d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_2d
- * Signature: (IILjfftw/Complex;Ljfftw/Complex;II)J
+ * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_12d
   (JNIEnv *, jclass, jint, jint, jobject, jobject, jint, jint);
@@ -290,7 +266,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_12d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_3d
- * Signature: (IIILjfftw/Complex;Ljfftw/Complex;II)J
+ * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_13d
   (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint, jint);
@@ -298,7 +274,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_13d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r
- * Signature: (I[ILjfftw/Complex;Ljfftw/Real;I)J
+ * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
   (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint);
@@ -306,7 +282,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_1d
- * Signature: (ILjfftw/Complex;Ljfftw/Real;I)J
+ * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_11d
   (JNIEnv *, jclass, jint, jobject, jobject, jint);
@@ -314,7 +290,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_11d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_2d
- * Signature: (IILjfftw/Complex;Ljfftw/Real;I)J
+ * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_12d
   (JNIEnv *, jclass, jint, jint, jobject, jobject, jint);
@@ -322,7 +298,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_12d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_3d
- * Signature: (IIILjfftw/Complex;Ljfftw/Real;I)J
+ * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_13d
   (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint);
@@ -330,7 +306,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_13d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c
- * Signature: (I[ILjfftw/Real;Ljfftw/Complex;I)J
+ * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
   (JNIEnv *, jclass, jint, jintArray, jobject, jobject, jint);
@@ -338,7 +314,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_1d
- * Signature: (ILjfftw/Real;Ljfftw/Complex;I)J
+ * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_11d
   (JNIEnv *, jclass, jint, jobject, jobject, jint);
@@ -346,7 +322,7 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_11d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_2d
- * Signature: (IILjfftw/Real;Ljfftw/Complex;I)J
+ * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_12d
   (JNIEnv *, jclass, jint, jint, jobject, jobject, jint);
@@ -354,106 +330,10 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_12d
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_3d
- * Signature: (IIILjfftw/Real;Ljfftw/Complex;I)J
+ * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_13d
   (JNIEnv *, jclass, jint, jint, jint, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljfftw/Complex;Ljfftw/Complex;II)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft_c2r
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljfftw/Complex;Ljfftw/Real;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft_1c2r
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft_r2c
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljfftw/Real;Ljfftw/Complex;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft_1r2c
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft_split
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft_1split
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft_split_c2r
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft_1split_1c2r
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru_dft_split_r2c
- * Signature: (I[Ljfftw/Guru/Dimension;I[Ljfftw/Guru/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru_1dft_1split_1r2c
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljfftw/Complex;Ljfftw/Complex;II)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft_c2r
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljfftw/Complex;Ljfftw/Real;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft_1c2r
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft_r2c
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljfftw/Real;Ljfftw/Complex;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft_1r2c
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft_split
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft_1split
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft_split_c2r
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft_1split_1c2r
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jint);
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_plan_guru64_dft_split_r2c
- * Signature: (I[Ljfftw/Guru64/Dimension;I[Ljfftw/Guru64/Dimension;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
- */
-JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1guru64_1dft_1split_1r2c
-  (JNIEnv *, jclass, jint, jobjectArray, jint, jobjectArray, jobject, jobject, jobject, jint);
 
 #ifdef __cplusplus
 }
