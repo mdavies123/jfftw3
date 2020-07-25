@@ -52,9 +52,9 @@ This library is meant to give the user as much control over FFTW as possible whi
 
 ```C
 int N = 1024;
-fftw_complex *cin = fftw_malloc(sizeof(fftw_complex) * N);
-fftw_complex *cout = fftw_malloc(sizeof(fftw_complex) * N);
-fftw_plan plan = fftw_plan_dft_1d(N, cin, cout, FFTW_FORWARD, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
+fftw_complex *ci = fftw_malloc(sizeof(fftw_complex) * N);
+fftw_complex *co = fftw_malloc(sizeof(fftw_complex) * N);
+fftw_plan plan = fftw_plan_dft_1d(N, ci, co, FFTW_FORWARD, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 fftw_execute(plan);
 fftw_destroy_plan(plan);
 ```
@@ -63,68 +63,46 @@ Into Java:
 
 ```Java
 int N = 1024;
-Complex cin = new Complex(N);
-Complex cout = new Complex(N);
-Plan p = new Plan(cin, cout, Sign.NEGATIVE, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), N);
+DoubleBuffer ci = Interface.allocateComplex(N);
+DoubleBuffer co = Interface.allocateComplex(N);
+Plan p = new Plan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), N);
 p.execute();
 p.destroy();
 ```
 
-Both these snippets will create two complex interleaved arrays of size 1024, a new plan using those arrays and user specific flags, and execute the plan. Note that the Plan objects in Java handle their own construction, execution, modification, and destruction. Calling the `execute` method on a Plan object is directly equivalent to calling the `fftw_execute` function on an `fftw_plan` in C. 
-
-In a similar vein, an effort was made to reduce some of the redundancy that would arise from this object-oriented approach to FFTW. Instead of a function like `fftw_execute_dft_c2r` for the new array execute functions in C, Java allows us to overload an object's methods to ensure a concise naming scheme:
-
-`fftw_execute_dft_c2r(plan, (fftw_complex *) ci, (double *) ro)` becomes `plan.execute((Complex) ci, (Real) ro)`
-
-The information conveyed by the function name in C is instead conveyed by the method signature in Java.
+Both these snippets will create two complex interleaved arrays of size 1024, a new plan using those arrays and user specific flags, and execute the plan.
 
 ## Datatypes
 
-This library implements two objects, [Complex](src/jfftw/Complex.java) and [Real](src/jfftw/Real.java), to represent the data you wish to transform.
+This library makes use of direct ByteBuffers available in the `java.nio` package. Direct buffers allow the JVM and JNI to access the same shared memory location reducing overhead from copying arrays back and forth between the JVM and JNI. 
 
-The `Complex` object is backed by a `DoubleBuffer` with a capacity twice the size of the `Complex` object's size. As FFTW expects arrays to be [interleaved](http://www.fftw.org/fftw3_doc/Complex-numbers.html#Complex-numbers), the imaginary part of the complex number is understood to be stored in the next memory location from the real part. Therefore, the capacity of a `Complex` object's `DoubleBuffer` is twice the size of the `Complex` object's size. You may access the real and imaginary parts of the `Complex` object's `DoubleBuffer` using the template below:
-
-```Java
-int N = 500;
-Complex cplx = new Complex(N);
-DoubleBuffer buff = cplx.get();
-for (int i = 0; i < N * 2; i += 2) {
-  double re = buff.get(i);
-  double im = buff.get(i + 1);
-}
-```
-
-The `Real` object is backed by a `DoubleBuffer` with a capacity equal to the `Real` object's size. As there is no imaginary part to this `Real` object, the capacity of its `DoubleBuffer` is equal to its size. You may access real values using the template below:
+The [Interface](src/jfftw/Interface.java) class implements two methods to allocate direct buffers using FFTW's `fftw_alloc_complex` and `fftw_alloc_real` functions:
 
 ```Java
-int N = 500;
-Real real = new Real(N);
-DoubleBuffer buff = real.get();
-for (int i = 0; i < N; i++) {
-  double re = buff.get(i);
-}
+DoubleBuffer cplx = Interface.allocateComplex(512);
+DoubleBuffer real = Interface.allocateReal(512);
 ```
 
-Both the `Complex` and `Real` objects extend the package-private `Interleave` class, and can be passed to the `Plan` constructor as shown in the next section.
+Doing so ensures maximum support for [SIMD](http://www.fftw.org/fftw3_doc/SIMD-alignment-and-fftw_005fmalloc.html) instruction sets.
 
 ## Plans
 
 FFTW implements a [planning](http://www.fftw.org/fftw3_doc/Using-Plans.html#Using-Plans) feature which produces a plan containing "all information necessary to compute the transform, including the pointers to the input and output arrays."
 
-In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the address of the `fftw_plan` in native code, and references to direct `DoubleBuffers` which contain the complex or real data for transformation. The memory allocated to these `DoubleBuffers` in the JVM will be the same memory accessible to FFTW in native code. This reduces the overhead of copying arrays back and forth between native code and the JVM.
+In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the address of the `fftw_plan` in native code, and references to the direct `DoubleBuffer` objects supplied upon plan creation.
 
-New array execute functions are provided in the [Plan](src/jfftw/Plan.java) class. The inputs to these methods must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
+A new array execute function is provided in the [Plan](src/jfftw/Plan.java) class as well. The inputs to this method must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
 
 ### Plan Creation
 
 To create a [Plan](src/jfftw/Plan.java), you must first construct input and output arrays. Note that "you must create the plan before initializing the input, because FFTW_MEASURE overwrites the in/out arrays. (Technically, FFTW_ESTIMATE does not touch your arrays, but you should always create plans first just to be sure.)"
 
-Use the [Complex](src/jfftw/Complex.java) or [Real](src/jfftw/Real.java) classes to allocate your arrays:
+Use the [Interface](src/jfftw/Interface.java) class to allocate your arrays:
 
 ```Java
-int N = 4096; // N is the size of the transform
-Complex ci = new Complex(N); // note that the input and output sizes are the same
-Real ro = new Real(N); // also note that ci is backed by a DoubleBuffer twice the size of ro
+int N = 4096;
+DoubleBuffer ci = Interface.allocateComplex(N); // note that the input and output sizes are the same
+DoubleBuffer ro = Interface.allocateReal(N);    // also note that `ci` is a DoubleBuffer twice the capacity of `ro`
 ```
 
 Then you may wish to combine a few flags:
@@ -136,22 +114,18 @@ int flags = Flag.combine(Flag.PRESERVE_INPUT, Flag.MEASURE);
 Now you can create a plan:
 
 ```Java
-Plan p = new Plan(ci, ro, Sign.NEGATIVE, flags, N);
+Plan p = new Plan(ci, ro, -1, Complexity.COMPLEX_TO_REAL, flags);
 ```
 
 Populate your input:
 
 ```Java
-double[] signal = new double[N * 2]; // note that the complex input is twice the size of the transform
-double re, im;
-for (int i = 0; i < signal.length; i += 2) {
-  re = Math.random();
-  im = Math.random();
-  signal[i] = re;
-  signal[i + 1] = im;
+for (int i = 0; i < N*2; i += 2) {
+  double re = Math.random();
+  double im = Math.random();
+  ci.put(i, re);
+  ci.put(i + 1, im);
 }
-DoubleBuffer input = ci.get();
-input.put(signal);
 ```
 
 And execute the plan:
@@ -163,7 +137,7 @@ p.execute();
 To collect the output of the transform, gain access to the `DoubleBuffer` referenced by your output:
 
 ```Java
-DoubleBuffer out = ro.get();
+DoubleBuffer out = p.getOutput(); // this method will provide access to the DoubleBuffer supplied upon Plan creation only
 ```
 
 And copy the data back to a `double[]`:
@@ -206,46 +180,24 @@ FFTW uses [wisdom](http://www.fftw.org/fftw3_doc/Wisdom.html#Wisdom) to save and
 
 The [Wisdom](src/jfftw/Wisdom.java) class facilitates the import and export of FFTW wisdom. 
 
-# Examples
-
-See the [examples package](src/jfftw/examples/) for some other use cases.
-
-# Guru Interface
-
-FFTW implements a [Guru Interface](http://www.fftw.org/fftw3_doc/Guru-Interface.html) to offer maximum flexibility over the transforms FFTW computes.
-
-This interface is implemented in this library by the [Guru](src/jfftw/Guru.java) and [Guru64](src/jfftw/Guru64.java) classes. The Guru Interface introduces a new `fftw_iodim` datastructure implemented in the `Guru.Dimension` subclass. You must pass two arrays of these dimensions to the Guru interface when creating a plan. The first array describes the transform dimensions, while the second array describes the [vector](http://www.fftw.org/fftw3_doc/Guru-vector-and-transform-sizes.html#Guru-vector-and-transform-sizes) dimensions.
-
-You must create Guru Plans statically like so:
-
-```Java
-int n0 = 4096, n1 = 32, n2 = 16;
-Complex ci = new Complex(n0 * n1 * n2);
-Guru.Dimension[] t = Guru.makeDimensions(new int[] {n0, n1, n2}, new int[] {1, 1, 1}, new int[] {1, 1, 1});
-Guru.Dimension[] v = Guru.makeDimensions(new int[0], new int[0], new int[0]); // only one transform so rank = 0
-Plan p = Guru.plan(t, v, ci, ci, sign, flags);
-```
-
-Note: Java dimensions are generally specified with 32-bit integers, so this implementation of the 64-bit Guru interface most likely will not support the desired 64-bit transform sizes. However, these methods are available for completionist's sake, and as a future TODO. 
-
 # A Note on Thread Safety
 
 The only thread-safe routine in FFTW is `fftw_execute` and its new array execute variants. This library enforces thread safety by prepending the `synchronized` keyword to all of its native methods except for the plan execution methods. As a result, you should be able to leverage Java parallelism for execution. However, please understand that planning routines may hold locks for an extended period of time.
 
-It is also important to note that while you may use the same plan across a number of threads, plan execution operates on the arrays it was created with by default. To use the same plan across multiple threads with different arrays please use the new array execution methods as shown below:
+It is also important to note that while you may use the same plan across a number of threads, plan execution operates on the arrays it was created with by default. To use the same plan across multiple threads with different arrays consider using the new array execution method as shown below:
 
 ```Java
 int N = 8192, nthreads = 8;
-Complex in = new Complex(N);
-Complex out = new Complex(N);
+DoubleBuffer ci = Interface.allocateComplex(N);
+DoubleBuffer co = Interface.allocateComplex(N);
 int flags = Flag.combine(Flag.MEASURE);
-Plan plan = new Plan(in, out, Sign.NEGATIVE, flags, N);
+Plan plan = new Plan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, flags, N);
 for (int i = 0; i < nthreads; i++) {
   new Thread(new Runnable() {
     public void run() {
-      Complex input = new Complex(N);
-      Complex output = new Complex(N);
-      plan.execute(input, output);
+      DoubleBuffer in = Interface.allocateComplex(N);
+      DoubleBuffer out = Interface.allocateComplex(N);
+      plan.execute(in, out);
     }
   }).start();
 }
