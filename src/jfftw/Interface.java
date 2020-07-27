@@ -12,43 +12,33 @@ public class Interface {
 
     protected static synchronized native ByteBuffer jfftw_alloc_complex(long N);
 
-    protected static synchronized native int jfftw_alignment_of(DoubleBuffer v);
+    protected static synchronized native <T> int jfftw_alignment_of(T v);
 
     protected static synchronized native void jfftw_cleanup();
 
     protected static synchronized native void jfftw_cleanup_threads();
 
-    protected static synchronized native double jfftw_cost(Plan p);
+    protected static synchronized native double jfftw_cost(Plan<?> p);
 
-    protected static synchronized native void jfftw_destroy_plan(Plan p);
+    protected static synchronized native void jfftw_destroy_plan(Plan<?> p);
 
-    protected static synchronized native double jfftw_estimate_cost(Plan p);
+    protected static synchronized native double jfftw_estimate_cost(Plan<?> p);
 
-    protected static native void jfftw_execute(Plan p);
+    protected static native void jfftw_execute(Plan<?> p);
 
-    protected static native void jfftw_execute_dft(Plan p, DoubleBuffer ci, DoubleBuffer co);
+    protected static native <T> void jfftw_execute_dft(Plan<T> p, T ci, T co);
 
-    protected static native void jfftw_execute_dft_c2r(Plan p, DoubleBuffer ci, DoubleBuffer ro);
+    protected static native <T> void jfftw_execute_dft_c2r(Plan<T> p, T ci, T ro);
 
-    protected static native void jfftw_execute_dft_r2c(Plan p, DoubleBuffer ri, DoubleBuffer co);
-
-    protected static native void jfftw_execute_r2r(Plan p, DoubleBuffer ri, DoubleBuffer ro);
-
-    protected static synchronized native void jfftw_export_wisdom_to_file(File f);
+    protected static native <T> void jfftw_execute_dft_r2c(Plan<T> p, T ri, T co);
 
     protected static synchronized native boolean jfftw_export_wisdom_to_filename(String s);
 
     protected static synchronized native String jfftw_export_wisdom_to_string();
 
-    protected static synchronized native void jfftw_flops(Plan p, double[] add, double[] mul, double[] fmas);
-
     protected static synchronized native void jfftw_forget_wisdom();
 
-    protected static synchronized native void jfftw_fprint_plan(Plan p, String s);
-
     protected static synchronized native boolean jfftw_import_system_wisdom();
-
-    protected static synchronized native boolean jfftw_import_wisdom_from_file(File f);
 
     protected static synchronized native boolean jfftw_import_wisdom_from_filename(String s);
 
@@ -62,33 +52,33 @@ public class Interface {
 
     protected static synchronized native void jfftw_set_timelimit(double t);
 
-    protected static synchronized native void jfftw_print_plan(Plan p);
+    protected static synchronized native void jfftw_print_plan(Plan<?> p);
 
-    protected static synchronized native String jfftw_sprint_plan(Plan p);
+    protected static synchronized native String jfftw_sprint_plan(Plan<?> p);
 
-    protected static synchronized native long jfftw_plan_dft(int rank, int[] n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft(int rank, int[] n, T ci, T co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_1d(int n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_1d(int n, T ci, T co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_2d(int n0, int n1, T ci, T co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_3d(int n0, int n1, int n2, T ci, T co, int sign, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_c2r(int rank, int[] n, T ci, T ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_1d(int n, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_c2r_1d(int n, T ci, T ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_c2r_2d(int n0, int n1, T ci, T ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, T ci, T ro, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, DoubleBuffer ri, DoubleBuffer co, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_r2c(int rank, int[] n, T ri, T co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_1d(int n, DoubleBuffer ri, DoubleBuffer co, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_r2c_1d(int n, T ri, T co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, DoubleBuffer ri, DoubleBuffer co, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_r2c_2d(int n0, int n1, T ri, T co, int flags);
 
-    protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, DoubleBuffer ri, DoubleBuffer co, int flags);
+    protected static synchronized native <T> long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, T ri, T co, int flags);
 
     /**
      * Used to determine the alignment of a DoubleBuffer.
@@ -96,9 +86,19 @@ public class Interface {
      * @param arr DoubleBuffer to check the alignment of
      * @return alignment
      */
-    public static int alignmentOf(DoubleBuffer arr) {
-        if (!arr.isDirect())
+    public static <T> int alignmentOf(T arr) {
+        if (arr instanceof DoubleBuffer && !((DoubleBuffer)arr).isDirect())
             throw new IllegalArgumentException("input buffer is not direct");
+        return jfftw_alignment_of(arr);
+    }
+
+    /**
+     * Used to determine the alignment of an array.
+     *
+     * @param arr array to check the alignment of
+     * @return alignment
+     */
+    public static int alignmentOf(double[] arr) {
         return jfftw_alignment_of(arr);
     }
 

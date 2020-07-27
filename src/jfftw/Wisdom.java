@@ -51,16 +51,6 @@ public class Wisdom {
     }
 
     /**
-     * Imports wisdom from a file pointed to by f.
-     *
-     * @param f file to import wisdom from
-     * @return true if wisdom import is successful, false otherwise
-     */
-    public static boolean importFromFile(File f) {
-        return jfftw_import_wisdom_from_file(f);
-    }
-
-    /**
      * Imports wisdom from a file represented by s.
      *
      * @param s absolute path of a file to import wisdom from
@@ -79,4 +69,5 @@ public class Wisdom {
     public static boolean importFromString(String s) {
         return jfftw_import_wisdom_from_string(s);
     }
+
 }

@@ -6,8 +6,20 @@
 #include <jni.h>
 #include <fftw3.h>
 
-void * get_array(JNIEnv *env, jobject jbuff) {
-    return (*env)->GetDirectBufferAddress(env, jbuff);
+double * get_array(JNIEnv *env, jobject jarr) {
+    jclass buff_c = (*env)->FindClass(env, "java/nio/DoubleBuffer");
+    if ((*env)->IsInstanceOf(env, jarr, buff_c))
+        return (*env)->GetDirectBufferAddress(env, jarr);
+    else
+        return (*env)->GetPrimitiveArrayCritical(env, jarr, 0);
+}
+
+void release_array(JNIEnv *env, jobject jarr, void *carr, jint commit) {
+    jclass buff_c = (*env)->FindClass(env, "java/nio/DoubleBuffer");
+    if ((*env)->IsInstanceOf(env, jarr, buff_c))
+        return;
+    else
+        (*env)->ReleasePrimitiveArrayCritical(env, jarr, carr, commit);
 }
 
 fftw_plan get_fftw_plan(JNIEnv *env, jobject p) {
@@ -41,13 +53,12 @@ JNIEXPORT jobject JNICALL Java_jfftw_Interface_jfftw_1alloc_1complex
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_alignment_of
- * Signature: (Ljava/nio/DoubleBuffer;)I
+ * Signature: (Ljava/lang/Object;)I
  */
 JNIEXPORT jint JNICALL Java_jfftw_Interface_jfftw_1alignment_1of
   (JNIEnv *env, jclass clazz, jobject jarr) {
     double *carr = (double *) get_array(env, jarr);
-    jint alignment = fftw_alignment_of(carr);
-    return alignment;
+    return fftw_alignment_of(carr);
 }
 
 /*
@@ -117,7 +128,7 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
+ * Signature: (Ljfftw/Plan;Ljava/lang/Object;Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft
   (JNIEnv *env, jclass clazz, jobject plan, jobject ji, jobject jo) {
@@ -125,12 +136,14 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_execute_dft(p, ci, co);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft_c2r
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
+ * Signature: (Ljfftw/Plan;Ljava/lang/Object;Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1c2r
   (JNIEnv *env, jclass clazz, jobject plan, jobject ji, jobject jo) {
@@ -138,12 +151,14 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1c2r
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     double *ro = get_array(env, jo);
     fftw_execute_dft_c2r(p, ci, ro);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, ro, JNI_COMMIT);
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_execute_dft_r2c
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
+ * Signature: (Ljfftw/Plan;Ljava/lang/Object;Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1r2c
   (JNIEnv *env, jclass clazz, jobject plan, jobject ji, jobject jo) {
@@ -151,19 +166,8 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1dft_1r2c
     double *ri = get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_execute_dft_r2c(p, ri, co);
-}
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_execute_r2r
- * Signature: (Ljfftw/Plan;Ljava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1execute_1r2r
-  (JNIEnv *env, jclass clazz, jobject plan, jobject ji, jobject jo) {
-    fftw_plan p = get_fftw_plan(env, plan);
-    double *ri = get_array(env, ji);
-    double *ro = get_array(env, jo);
-    fftw_execute_r2r(p, ri, ro);
+    release_array(env, ji, ri, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
 }
 
 /*
@@ -190,16 +194,6 @@ JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1export_1wisdom_1to_1string
     jstring jstr = (*env)->NewStringUTF(env, s);
     free(s);
     return jstr;
-}
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_flops
- * Signature: (Ljfftw/Plan;[D[D[D)V
- */
-JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1flops
-  (JNIEnv *env, jclass clazz, jobject plan, jdoubleArray a1, jobject a2, jobject a3) {
-    printf("%s\n", "Java_jfftw_Interface_jfftw_1flops not implemented.");
 }
 
 /*
@@ -235,23 +229,6 @@ JNIEXPORT void JNICALL Java_jfftw_Interface_jfftw_1fprint_1plan
 JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1system_1wisdom
   (JNIEnv *env, jclass clazz) {
     return fftw_import_system_wisdom() == 1;
-}
-
-/*
- * Class:     jfftw_Interface
- * Method:    jfftw_import_wisdom_from_file
- * Signature: (Ljava/io/File;)Z
- */
-JNIEXPORT jboolean JNICALL Java_jfftw_Interface_jfftw_1import_1wisdom_1from_1file
-  (JNIEnv *env, jclass clazz, jobject file) {
-    jmethodID jmid = (*env)->GetMethodID(env, file, "getAbsolutePath", "java/lang/String;");
-    jobject jstr = (*env)->CallObjectMethod(env, file, jmid);
-    const char *path = (*env)->GetStringUTFChars(env, jstr, 0);
-    FILE *f = fopen(path, "w+");
-    jboolean success = fftw_import_wisdom_from_file(f) == 1;
-    fclose(f);
-    (*env)->ReleaseStringUTFChars(env, jstr, path);
-    return success;
 }
 
 /*
@@ -347,61 +324,69 @@ JNIEXPORT jstring JNICALL Java_jfftw_Interface_jfftw_1sprint_1plan
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft
- * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
+ * Signature: (I[ILjava/lang/Object;Ljava/lang/Object;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft
-  (JNIEnv *env, jclass clazz, jint rank, jintArray n, jobject ji, jobject jo, jint sign, jint flags) {
+ (JNIEnv *env, jclass clazz, jint rank, jintArray n, jobject ji, jobject jo, jint sign, jint flags) {
     int *nums = (int *) (*env)->GetPrimitiveArrayCritical(env, n, 0);
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft(rank, nums, ci, co, sign, flags);
     (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_1d
- * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
+ * Signature: (ILjava/lang/Object;Ljava/lang/Object;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_11d
-  (JNIEnv *env, jclass clazz, jint n, jobject ji, jobject jo, jint sign, jint flags) {
+ (JNIEnv *env, jclass clazz, jint n, jobject ji, jobject jo, jint sign, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_1d(n, ci, co, sign, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_2d
- * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
+ * Signature: (IILjava/lang/Object;Ljava/lang/Object;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_12d
   (JNIEnv *env, jclass clazz, jint n0, jint n1, jobject ji, jobject jo, jint sign, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_2d(n0, n1, ci, co, sign, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_3d
- * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;II)J
+ * Signature: (IIILjava/lang/Object;Ljava/lang/Object;II)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_13d
   (JNIEnv *env, jclass clazz, jint n0, jint n1, jint n2, jobject ji, jobject jo, jint sign, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_3d(n0, n1, n2, ci, co, sign, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r
- * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (I[ILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
   (JNIEnv *env, jclass clazz, jint rank, jintArray n, jobject ji, jobject jo, jint flags) {
@@ -410,52 +395,60 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r
     double *ro = (double *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_c2r(rank, nums, ci, ro, flags);
     (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, ro, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_1d
- * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (ILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_11d
   (JNIEnv *env, jclass clazz, jint n, jobject ji, jobject jo, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     double *ro = (double *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_c2r_1d(n, ci, ro, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, ro, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_2d
- * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (IILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_12d
   (JNIEnv *env, jclass clazz, jint n0, jint n1, jobject ji, jobject jo, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     double *ro = (double *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_c2r_2d(n0, n1, ci, ro, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, ro, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_c2r_3d
- * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (IIILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1c2r_13d
   (JNIEnv *env, jclass clazz, jint n0, jint n1, jint n2, jobject ji, jobject jo, jint flags) {
     fftw_complex *ci = (fftw_complex *) get_array(env, ji);
     double *ro = (double *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_c2r_3d(n0, n1, n2, ci, ro, flags);
+    release_array(env, ji, ci, JNI_COMMIT);
+    release_array(env, jo, ro, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c
- * Signature: (I[ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (I[ILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
   (JNIEnv *env, jclass clazz, jint rank, jintArray n, jobject ji, jobject jo, jint flags) {
@@ -464,44 +457,52 @@ JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_r2c(rank, nums, ri, co, flags);
     (*env)->ReleasePrimitiveArrayCritical(env, n, nums, JNI_COMMIT);
+    release_array(env, ji, ri, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_1d
- * Signature: (ILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (ILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_11d
   (JNIEnv *env, jclass clazz, jint n, jobject ji, jobject jo, jint flags) {
     double *ri = (double *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_r2c_1d(n, ri, co, flags);
+    release_array(env, ji, ri, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_2d
- * Signature: (IILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (IILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_12d
   (JNIEnv *env, jclass clazz, jint n0, jint n1, jobject ji, jobject jo, jint flags) {
     double *ri = (double *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_r2c_2d(n0, n1, ri, co, flags);
+    release_array(env, ji, ri, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
 
 /*
  * Class:     jfftw_Interface
  * Method:    jfftw_plan_dft_r2c_3d
- * Signature: (IIILjava/nio/DoubleBuffer;Ljava/nio/DoubleBuffer;I)J
+ * Signature: (IIILjava/lang/Object;Ljava/lang/Object;I)J
  */
 JNIEXPORT jlong JNICALL Java_jfftw_Interface_jfftw_1plan_1dft_1r2c_13d
-  (JNIEnv *env, jclass clazz, jint n0, jint n1, jint n2, jobject ji, jobject jo, jint flags) {
+ (JNIEnv *env, jclass clazz, jint n0, jint n1, jint n2, jobject ji, jobject jo, jint flags) {
     double *ri = (double *) get_array(env, ji);
     fftw_complex *co = (fftw_complex *) get_array(env, jo);
     fftw_plan p = fftw_plan_dft_r2c_3d(n0, n1, n2, ri, co, flags);
+    release_array(env, ji, ri, JNI_COMMIT);
+    release_array(env, jo, co, JNI_COMMIT);
     return (jlong) p;
 }
