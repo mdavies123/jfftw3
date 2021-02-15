@@ -1,4 +1,4 @@
-# JFFTW
+# JFFTW3
 
 Java wrapper for FFTW3.
 
