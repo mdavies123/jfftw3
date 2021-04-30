@@ -3,13 +3,13 @@
 ####################################################################################
 
 # c compiler
-CC = gcc
+CC = gcc-9
 
 # linux, win32, or darwin
-PLATFORM = linux
+PLATFORM = darwin
 
 # path to the java include directory
-JAVAINCL = /usr/lib/jvm/java-openjdk/include
+JAVAINCL = /usr/local/java/latest/include
 
 # path to the FFTW3 include directory
 FFTWINCL = /usr/local/include
@@ -22,7 +22,7 @@ FFTWLIBDIR = /usr/local/lib
 FFTWLIBNM = fftw3
 
 # shared library target
-TARGET = libjfftw.so
+TARGET = libjfftw.dylib
 
 # FFTW thread library name
 # leave this blank if you compiled FFTW with '--with-combined-threads' or if you did
@@ -35,7 +35,7 @@ FFTWLIBTHREAD = fftw3_omp
 
 SRCS = $(wildcard src/c/*.c)
 OBJS = $(SRCS:.c=.o)
-CFLAGS = -O3 -fPIC -march=native -Isrc/c/ -I"$(JAVAINCL)" -I"$(JAVAINCL)/$(PLATFORM)" -I"$(FFTWINCL)" -Wall -std=c11
+CFLAGS = -O3 -fPIC -flto -march=native -Isrc/c/ -I"$(JAVAINCL)" -I"$(JAVAINCL)/$(PLATFORM)" -I"$(FFTWINCL)" -Wall -std=c11
 LDFLAGS = -shared -l$(FFTWLIBNM) -L"$(FFTWLIBDIR)" -Wall
 
 ifeq ($(FFTWLIBTHREAD),fftw3_omp)
