@@ -1,4 +1,4 @@
-package jfftw;
+package jfftw.planning;
 
 /**
  * Enumeration representing the placement of a plan.

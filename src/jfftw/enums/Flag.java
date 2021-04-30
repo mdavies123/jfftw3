@@ -1,4 +1,4 @@
-package jfftw;
+package jfftw.enums;
 
 public enum Flag {
 

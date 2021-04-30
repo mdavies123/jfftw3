@@ -1,4 +1,4 @@
-package jfftw;
+package jfftw.enums;
 
 /**
  * Enumeration representing the type of complexity of a plan.

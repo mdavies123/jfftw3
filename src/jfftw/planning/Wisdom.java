@@ -1,25 +1,19 @@
-package jfftw;
-
-import java.io.File;
-
-import static jfftw.Interface.*;
+package jfftw.planning;
 
 public class Wisdom {
+
+    protected static synchronized native boolean jfftw_export_wisdom_to_filename(String s);
+    protected static synchronized native String jfftw_export_wisdom_to_string();
+    protected static synchronized native void jfftw_forget_wisdom();
+    protected static synchronized native boolean jfftw_import_system_wisdom();
+    protected static synchronized native boolean jfftw_import_wisdom_from_filename(String s);
+    protected static synchronized native boolean jfftw_import_wisdom_from_string(String s);
 
     /**
      * Clears all currently stored wisdom.
      */
     public static void forgetWisdom() {
         jfftw_forget_wisdom();
-    }
-
-    /**
-     * Exports wisdom to the file pointed to by f.
-     *
-     * @param f file to store wisdom
-     */
-    public static void export(File f) {
-        jfftw_export_wisdom_to_filename(f.getAbsolutePath());
     }
 
     /**

@@ -68,3 +68,5 @@ CMakeLists.txt
 .classpath
 .project
 
+# macOS stuff
+.DS_store
