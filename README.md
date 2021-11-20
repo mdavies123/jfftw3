@@ -215,8 +215,8 @@ DirectPlan plan = new DirectPlan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, flag
 for (int i = 0; i < nthreads; i++) {
   new Thread(new Runnable() {
     public void run() {
-      DoubleBuffer in = Interface.allocateComplex(N);
-      DoubleBuffer out = Interface.allocateComplex(N);
+      DoubleBuffer in = DirectAllocator.allocateComplex(N);
+      DoubleBuffer out = DirectAllocator.allocateComplex(N);
       plan.execute(in, out);
     }
   }).start();
