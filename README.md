@@ -103,7 +103,7 @@ PrimitivePlan p = new PrimitivePlan(cplx, real, Complexity.COMPLEX_TO_COMPLEX, F
 
 Misaligned arrays will cause segfaults if FFTW is attempting to use SIMD instructions on those misaligned arrays. This library ensures array alignments are valid for plans that require strict alignment. 
 
-A [PrimitivePlan](src/jfftw/planning/PrimitivePlan.java) may have alignment issues when using the new array execute methods. If you encounter an `IllegalArgumentException` with the message, `"new array alignment not equal to plan alignment"`, while using a [PrimitivePlan](src/jfftw/planning/PrimitivePlan),  the JVM may have aligned the new arrays differently from the array supplied upon plan creation.
+A [PrimitivePlan](src/jfftw/planning/PrimitivePlan.java) may have alignment issues when using the new array execute methods. If you encounter an `IllegalArgumentException` with the message, `"new array alignment not equal to plan alignment"`, while using a [PrimitivePlan](src/jfftw/planning/PrimitivePlan.java), the JVM may have aligned the new arrays differently from the array supplied upon plan creation.
 
 ## Plans
 
