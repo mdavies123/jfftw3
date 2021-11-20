@@ -74,6 +74,8 @@ Both these snippets will create two complex interleaved arrays of size 1024, a n
 
 ## Datatypes
 
+### Direct Byte Buffers
+
 This library makes use of direct ByteBuffers available in the `java.nio` package. Direct buffers allow the JVM and JNI to access the same shared memory location reducing overhead from copying arrays back and forth between the JVM and JNI. 
 
 The [DirectAllocator](src/jfftw/data/DirectAllocator.java) class implements two methods to allocate direct buffers using FFTW's `fftw_alloc_complex` and `fftw_alloc_real` functions:
@@ -84,6 +86,24 @@ DoubleBuffer real = DirectAllocator.allocateReal(512);
 ```
 
 Doing so ensures maximum support for [SIMD](http://www.fftw.org/fftw3_doc/SIMD-alignment-and-fftw_005fmalloc.html) instruction sets.
+
+### Primitive Arrays
+
+This library also supports primitive arrays. Primitive arrays may be easier to use in Java code but require some special handling to minimize array copies when used in native code. 
+
+Construct a [PrimitivePlan](src/jfftw/planning/PrimitivePlan.java) the same way you would a [DirectPlan](src/jfftw/planning/DirectPlan.java):
+
+```Java
+double[] cplx = new double[512];
+double[] real = new double[512];
+PrimitivePlan p = new PrimitivePlan(cplx, real, Complexity.COMPLEX_TO_COMPLEX, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), null);
+```
+
+### Array Alignment
+
+Misaligned arrays will cause segfaults if FFTW is attempting to use SIMD instructions on those misaligned arrays. This library ensures array alignments are valid for plans that require strict alignment. 
+
+A [PrimitivePlan](src/jfftw/planning/PrimitivePlan.java) may have alignment issues when using the new array execute methods. If you encounter an `IllegalArgumentException` with the message, `"new array alignment not equal to plan alignment"`, while using a [PrimitivePlan](src/jfftw/planning/PrimitivePlan),  the JVM may have aligned the new arrays differently from the array supplied upon plan creation.
 
 ## Plans
 
