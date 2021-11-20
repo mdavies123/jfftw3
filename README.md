@@ -101,8 +101,8 @@ Use the [DirectAllocator](src/jfftw/data/DirectAllocator.java) class to allocate
 
 ```Java
 int N = 4096;
-DoubleBuffer ci = Interface.allocateComplex(N); // note that the input and output sizes are the same
-DoubleBuffer ro = Interface.allocateReal(N);    // also note that `ci` is a DoubleBuffer twice the capacity of `ro`
+DoubleBuffer ci = DirectAllocator.allocateComplex(N); // note that the input and output sizes are the same
+DoubleBuffer ro = DirectAllocator.allocateReal(N);    // also note that `ci` is a DoubleBuffer twice the capacity of `ro`
 ```
 
 Then you may wish to combine a few flags:
