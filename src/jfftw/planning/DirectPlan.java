@@ -10,21 +10,21 @@ import java.nio.DoubleBuffer;
 
 public final class DirectPlan extends Plan<DoubleBuffer> {
 
-    protected static native void jfftw_execute_dft(DirectPlan p, DoubleBuffer ci, DoubleBuffer co);
-    protected static native void jfftw_execute_dft_c2r(DirectPlan  p, DoubleBuffer ci, DoubleBuffer ro);
-    protected static native void jfftw_execute_dft_r2c(DirectPlan p, DoubleBuffer ri, DoubleBuffer co);
-    protected static synchronized native long jfftw_plan_dft(int rank, int[] n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_1d(int n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, DoubleBuffer ci, DoubleBuffer ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_1d(int n, DoubleBuffer ci, DoubleBuffer ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, DoubleBuffer ri, DoubleBuffer co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_1d(int n, DoubleBuffer ri, DoubleBuffer co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, DoubleBuffer ri, DoubleBuffer co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, DoubleBuffer ri, DoubleBuffer co, int flags);
+    private static native void jfftw_execute_dft(DirectPlan p, DoubleBuffer ci, DoubleBuffer co);
+    private static native void jfftw_execute_dft_c2r(DirectPlan p, DoubleBuffer ci, DoubleBuffer ro);
+    private static native void jfftw_execute_dft_r2c(DirectPlan p, DoubleBuffer ri, DoubleBuffer co);
+    private static synchronized native long jfftw_plan_dft(int rank, int[] n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_1d(int n, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_1d(int n, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, DoubleBuffer ci, DoubleBuffer ro, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, DoubleBuffer ri, DoubleBuffer co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_1d(int n, DoubleBuffer ri, DoubleBuffer co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, DoubleBuffer ri, DoubleBuffer co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, DoubleBuffer ri, DoubleBuffer co, int flags);
 
     /**
      * Constructs a new plan using direct DoubleBuffers.

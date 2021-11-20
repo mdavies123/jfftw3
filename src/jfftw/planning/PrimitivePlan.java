@@ -7,21 +7,21 @@ import jfftw.exceptions.UnsupportedComplexityException;
 
 public final class PrimitivePlan extends Plan<double[]> {
 
-    protected static native void jfftw_execute_dft(PrimitivePlan p, double[] ci, double[] co);
-    protected static native void jfftw_execute_dft_c2r(PrimitivePlan p, double[] ci, double[] ro);
-    protected static native void jfftw_execute_dft_r2c(PrimitivePlan p, double[] ri, double[] co);
-    protected static synchronized native long jfftw_plan_dft(int rank, int[] n, double[] ci, double[] co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_1d(int n, double[] ci, double[] co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_2d(int n0, int n1, double[] ci, double[] co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, double[] ci, double[] co, int sign, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, double[] ci, double[] ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_1d(int n, double[] ci, double[] ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, double[] ci, double[] ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, double[] ci, double[] ro, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, double[] ri, double[] co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_1d(int n, double[] ri, double[] co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, double[] ri, double[] co, int flags);
-    protected static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, double[] ri, double[] co, int flags);
+    private static native void jfftw_execute_dft(PrimitivePlan p, double[] ci, double[] co);
+    private static native void jfftw_execute_dft_c2r(PrimitivePlan p, double[] ci, double[] ro);
+    private static native void jfftw_execute_dft_r2c(PrimitivePlan p, double[] ri, double[] co);
+    private static synchronized native long jfftw_plan_dft(int rank, int[] n, double[] ci, double[] co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_1d(int n, double[] ci, double[] co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_2d(int n0, int n1, double[] ci, double[] co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_3d(int n0, int n1, int n2, double[] ci, double[] co, int sign, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r(int rank, int[] n, double[] ci, double[] ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_1d(int n, double[] ci, double[] ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_2d(int n0, int n1, double[] ci, double[] ro, int flags);
+    private static synchronized native long jfftw_plan_dft_c2r_3d(int n0, int n1, int n2, double[] ci, double[] ro, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c(int rank, int[] n, double[] ri, double[] co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_1d(int n, double[] ri, double[] co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_2d(int n0, int n1, double[] ri, double[] co, int flags);
+    private static synchronized native long jfftw_plan_dft_r2c_3d(int n0, int n1, int n2, double[] ri, double[] co, int flags);
 
     /**
      * Constructs a new plan using primitive double arrays.
