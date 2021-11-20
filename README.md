@@ -63,9 +63,9 @@ Into Java:
 
 ```Java
 int N = 1024;
-DoubleBuffer ci = Interface.allocateComplex(N);
-DoubleBuffer co = Interface.allocateComplex(N);
-Plan p = new Plan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), N);
+DoubleBuffer ci = DirectAllocator.allocateComplex(N);
+DoubleBuffer co = DirectAllocator.allocateComplex(N);
+DirectPlan p = new DirectPlan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, Flag.combine(Flag.MEASURE, Flag.PRESERVE_INPUT), null);
 p.execute();
 p.destroy();
 ```
@@ -76,11 +76,11 @@ Both these snippets will create two complex interleaved arrays of size 1024, a n
 
 This library makes use of direct ByteBuffers available in the `java.nio` package. Direct buffers allow the JVM and JNI to access the same shared memory location reducing overhead from copying arrays back and forth between the JVM and JNI. 
 
-The [Interface](src/jfftw/Interface.java) class implements two methods to allocate direct buffers using FFTW's `fftw_alloc_complex` and `fftw_alloc_real` functions:
+The [DirectAllocator](src/jfftw/data/DirectAllocator.java) class implements two methods to allocate direct buffers using FFTW's `fftw_alloc_complex` and `fftw_alloc_real` functions:
 
 ```Java
-DoubleBuffer cplx = Interface.allocateComplex(512);
-DoubleBuffer real = Interface.allocateReal(512);
+DoubleBuffer cplx = DirectAllocator.allocateComplex(512);
+DoubleBuffer real = DirectAllocator.allocateReal(512);
 ```
 
 Doing so ensures maximum support for [SIMD](http://www.fftw.org/fftw3_doc/SIMD-alignment-and-fftw_005fmalloc.html) instruction sets.
@@ -89,15 +89,15 @@ Doing so ensures maximum support for [SIMD](http://www.fftw.org/fftw3_doc/SIMD-a
 
 FFTW implements a [planning](http://www.fftw.org/fftw3_doc/Using-Plans.html#Using-Plans) feature which produces a plan containing "all information necessary to compute the transform, including the pointers to the input and output arrays."
 
-In the case of this library, the [Plan](src/jfftw/Plan.java) class holds the address of the `fftw_plan` in native code, and references to the direct `DoubleBuffer` objects supplied upon plan creation.
+In the case of this library, the [Plan](src/jfftw/planning/Plan.java) class holds the address of the `fftw_plan` in native code, and references to the direct `DoubleBuffer` objects supplied upon plan creation.
 
-A new array execute function is provided in the [Plan](src/jfftw/Plan.java) class as well. The inputs to this method must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
+A new array execute function is provided in the [Plan](src/jfftw/planning/Plan.java) class as well. The inputs to this method must adhere to the restrictions provided in the [FFTW doc](http://www.fftw.org/fftw3_doc/New_002darray-Execute-Functions.html#New_002darray-Execute-Functions).
 
 ### Plan Creation
 
-To create a [Plan](src/jfftw/Plan.java), you must first construct input and output arrays. Note that "you must create the plan before initializing the input, because FFTW_MEASURE overwrites the in/out arrays. (Technically, FFTW_ESTIMATE does not touch your arrays, but you should always create plans first just to be sure.)"
+To create a [Plan](src/jfftw/planning/Plan.java), you must first construct input and output arrays. Note that "you must create the plan before initializing the input, because `FFTW_MEASURE` overwrites the in/out arrays. (Technically, `FFTW_ESTIMATE` does not touch your arrays, but you should always create plans first just to be sure.)"
 
-Use the [Interface](src/jfftw/Interface.java) class to allocate your arrays:
+Use the [DirectAllocator](src/jfftw/data/DirectAllocator.java) class to allocate your arrays:
 
 ```Java
 int N = 4096;
@@ -114,7 +114,7 @@ int flags = Flag.combine(Flag.PRESERVE_INPUT, Flag.MEASURE);
 Now you can create a plan:
 
 ```Java
-Plan p = new Plan(ci, ro, -1, Complexity.COMPLEX_TO_REAL, flags);
+DirectPlan p = new DirectPlan(ci, ro, -1, Complexity.COMPLEX_TO_REAL, flags);
 ```
 
 Populate your input:
@@ -172,13 +172,13 @@ From the [FFTW doc](http://www.fftw.org/fftw3_doc/Planner-Flags.html):
 > * `FFTW_PRESERVE_INPUT` specifies that an out-of-place transform must not change its input array. This is ordinarily the default, except for c2r and hc2r (i.e. complex-to-real) transforms for which `FFTW_DESTROY_INPUT` is the default. In the latter cases, passing `FFTW_PRESERVE_INPUT` will attempt to use algorithms that do not destroy the input, at the expense of worse performance; for multi-dimensional c2r transforms, however, no input-preserving algorithms are implemented and the planner will return `NULL` if one is requested.
 > * `FFTW_UNALIGNED` specifies that the algorithm may not impose any unusual alignment requirements on the input/output arrays (i.e. no SIMD may be used). This flag is normally not necessary, since the planner automatically detects misaligned arrays. The only use for this flag is if you want to use the new-array execute interface to execute a given plan on a different array that may not be aligned like the original. (Using fftw_malloc makes this flag unnecessary even then. You can also use fftw_alignment_of to detect whether two arrays are equivalently aligned.)
 
-These flags are implemented as an Enum class in [Flag](src/jfftw/Flag.java).
+These flags are implemented as an Enum class in [Flag](src/jfftw/enums/Flag.java).
 
 ## Wisdom
 
 FFTW uses [wisdom](http://www.fftw.org/fftw3_doc/Wisdom.html#Wisdom) to save and reuse plans from storage.
 
-The [Wisdom](src/jfftw/Wisdom.java) class facilitates the import and export of FFTW wisdom. 
+The [Wisdom](src/jfftw/planning/Wisdom.java) class facilitates the import and export of FFTW wisdom. 
 
 # A Note on Thread Safety
 
@@ -188,10 +188,10 @@ It is also important to note that while you may use the same plan across a numbe
 
 ```Java
 int N = 8192, nthreads = 8;
-DoubleBuffer ci = Interface.allocateComplex(N);
-DoubleBuffer co = Interface.allocateComplex(N);
+DoubleBuffer ci = DirectAllocator.allocateComplex(N);
+DoubleBuffer co = DirectAllocator.allocateComplex(N);
 int flags = Flag.combine(Flag.MEASURE);
-Plan plan = new Plan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, flags, N);
+DirectPlan plan = new DirectPlan(ci, co, -1, Complexity.COMPLEX_TO_COMPLEX, flags, null);
 for (int i = 0; i < nthreads; i++) {
   new Thread(new Runnable() {
     public void run() {
