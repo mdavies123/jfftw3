@@ -62,36 +62,36 @@ public final class PrimitivePlan extends Plan<double[]> {
         if(requiresAligned)
             ensureAlignment(Alignment.of(in), Alignment.of(out));
         switch (complexity) {
-            case COMPLEX_TO_COMPLEX -> jfftw_execute_dft(this, in, out);
-            case COMPLEX_TO_REAL -> jfftw_execute_dft_c2r(this, in, out);
-            case REAL_TO_COMPLEX -> jfftw_execute_dft_r2c(this, in, out);
-            default -> throw new UnsupportedComplexityException(complexity);
+            case COMPLEX_TO_COMPLEX: jfftw_execute_dft(this, in, out); break;
+            case COMPLEX_TO_REAL: jfftw_execute_dft_c2r(this, in, out); break;
+            case REAL_TO_COMPLEX: jfftw_execute_dft_r2c(this, in, out); break;
+            default: throw new UnsupportedComplexityException(complexity);
         }
     }
 
     protected long create()  {
         int[] dims = dimensions.get();
-        return switch (complexity) {
-            case COMPLEX_TO_COMPLEX -> switch (rank) {
-                case 1 -> jfftw_plan_dft_1d(dims[0], input, output, sign, flags);
-                case 2 -> jfftw_plan_dft_2d(dims[0], dims[1], input, output, sign, flags);
-                case 3 -> jfftw_plan_dft_3d(dims[0], dims[1], dims[2], input, output, sign, flags);
-                default -> jfftw_plan_dft(rank, dims, input, output, sign, flags);
-            };
-            case COMPLEX_TO_REAL -> switch (rank) {
-                case 1 -> jfftw_plan_dft_c2r_1d(dims[0], input, output, flags);
-                case 2 -> jfftw_plan_dft_c2r_2d(dims[0], dims[1], input, output, flags);
-                case 3 -> jfftw_plan_dft_c2r_3d(dims[0], dims[1], dims[2], input, output, flags);
-                default -> jfftw_plan_dft_c2r(rank, dims, input, output, flags);
-            };
-            case REAL_TO_COMPLEX -> switch (rank) {
-                case 1 -> jfftw_plan_dft_r2c_1d(dims[0], input, output, flags);
-                case 2 -> jfftw_plan_dft_r2c_2d(dims[0], dims[1], input, output, flags);
-                case 3 -> jfftw_plan_dft_r2c_3d(dims[0], dims[1], dims[2], input, output, flags);
-                default -> jfftw_plan_dft_r2c(rank, dims, input, output, flags);
-            };
-            default -> throw new UnsupportedComplexityException(complexity);
-        };
+        switch (complexity) {
+            case COMPLEX_TO_COMPLEX: switch (rank) {
+                case 1: return jfftw_plan_dft_1d(dims[0], input, output, sign, flags);
+                case 2: return jfftw_plan_dft_2d(dims[0], dims[1], input, output, sign, flags);
+                case 3: return jfftw_plan_dft_3d(dims[0], dims[1], dims[2], input, output, sign, flags);
+                default: return jfftw_plan_dft(rank, dims, input, output, sign, flags);
+            }
+            case COMPLEX_TO_REAL: switch (rank) {
+                case 1: return jfftw_plan_dft_c2r_1d(dims[0], input, output, flags);
+                case 2: return jfftw_plan_dft_c2r_2d(dims[0], dims[1], input, output, flags);
+                case 3: return jfftw_plan_dft_c2r_3d(dims[0], dims[1], dims[2], input, output, flags);
+                default: return jfftw_plan_dft_c2r(rank, dims, input, output, flags);
+            }
+            case REAL_TO_COMPLEX: switch (rank) {
+                case 1: return jfftw_plan_dft_r2c_1d(dims[0], input, output, flags);
+                case 2: return jfftw_plan_dft_r2c_2d(dims[0], dims[1], input, output, flags);
+                case 3: return jfftw_plan_dft_r2c_3d(dims[0], dims[1], dims[2], input, output, flags);
+                default: return jfftw_plan_dft_r2c(rank, dims, input, output, flags);
+            }
+            default: throw new UnsupportedComplexityException(complexity);
+        }
     }
 
 }

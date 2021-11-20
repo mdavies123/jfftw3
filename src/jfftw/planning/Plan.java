@@ -62,31 +62,31 @@ public abstract class Plan<T> {
 
     protected final void ensureSizes(int iSize, int oSize) {
         switch (complexity) {
-            case COMPLEX_TO_COMPLEX -> {
+            case COMPLEX_TO_COMPLEX: {
                 if (iSize != oSize)
                     throw new IllegalArgumentException("input and output not equal size");
                 if ((iSize / 2) != size)
                     throw new IllegalArgumentException("transform size not equal to dimensions size");
-            }
-            case COMPLEX_TO_REAL -> {
+            } break;
+            case COMPLEX_TO_REAL: {
                 if (iSize / 2 != oSize)
                     throw new IllegalArgumentException("input and output not compatible size");
                 if ((iSize / 2) != size)
                     throw new IllegalArgumentException("transform size not equal to dimensions size");
-            }
-            case REAL_TO_COMPLEX -> {
+            } break;
+            case REAL_TO_COMPLEX: {
                 if (iSize != (oSize / 2))
                     throw new IllegalArgumentException("input and output not compatible size");
                 if (iSize != size)
                     throw new IllegalArgumentException("transform size not equal to dimensions size");
-            }
-            case REAL_TO_REAL -> {
+            } break;
+            case REAL_TO_REAL: {
                 if (iSize != oSize)
                     throw new IllegalArgumentException("input and output not equal size");
                 if (iSize != size)
                     throw new IllegalArgumentException("transform size not equal to dimensions size");
-            }
-            default -> throw new UnsupportedOperationException(complexity + " transform not supported");
+            } break;
+            default: throw new UnsupportedOperationException(complexity + " transform not supported");
         }
     }
 
